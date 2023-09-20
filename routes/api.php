@@ -21,3 +21,12 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::middleware(['auth.sparkpost'])->prefix('sparkpost')->group(function () {
+  Route::post('receive', function(){
+    return "it works";
+  });
+
+  // Route::get('history', [App\Http\Controllers\MessagesController::class, 'history']); // testing only
+// })->middleware(['auth.sparkpost']);
+});
