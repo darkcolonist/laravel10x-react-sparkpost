@@ -7,7 +7,7 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
-## Laravel10x + React + Vite Chat Application
+## Laravel10x + React + Sparkpost In And Out Simulation
 ### database queue
 ```
 .env
