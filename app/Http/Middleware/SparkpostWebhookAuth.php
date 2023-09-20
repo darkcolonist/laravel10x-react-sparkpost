@@ -26,7 +26,7 @@ class SparkpostWebhookAuth
         ->exactly($request->header(self::TOKEN_HEADER));
 
       if(!$authenticated){
-        Log::info([
+        Log::channel('appdebug')->info([
           'sparkpost api failure'
           , $request->ip()
           , self::TOKEN_HEADER.":".$request->header(self::TOKEN_HEADER)

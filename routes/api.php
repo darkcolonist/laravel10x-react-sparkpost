@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -24,9 +25,11 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::middleware(['auth.sparkpost'])->prefix('sparkpost')->group(function () {
   Route::post('receive', function(){
+    $payLoad = json_decode(request()->getContent(), true);
+
+    Log::channel("appdebug")->info([
+      $payLoad
+    ]);
     return "it works";
   });
-
-  // Route::get('history', [App\Http\Controllers\MessagesController::class, 'history']); // testing only
-// })->middleware(['auth.sparkpost']);
 });
