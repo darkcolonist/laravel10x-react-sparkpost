@@ -31,10 +31,6 @@ Route::middleware(['auth.sparkpost'])->prefix('sparkpost')->group(function () {
     $result = "";
 
     if(count($inboundMessages)){
-      // $result = json_encode([
-      //   $inboundMessages
-      // ], JSON_PRETTY_PRINT);
-
       foreach ($inboundMessages as $anInboundMessageItem) {
         $message = new Message($anInboundMessageItem);
         $message->save();
