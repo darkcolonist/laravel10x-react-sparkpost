@@ -28,21 +28,24 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::middleware(['auth.sparkpost'])->prefix('sparkpost')->group(function () {
   Route::post('receive', function(){
     $inboundMessages = SparkpostFacade::parseInboundMessages(request());
-    $result;
+    $result = "";
 
     if(count($inboundMessages)){
-      $result = json_encode([
-        $inboundMessages
-      ], JSON_PRETTY_PRINT);
+      // $result = json_encode([
+      //   $inboundMessages
+      // ], JSON_PRETTY_PRINT);
 
       foreach ($inboundMessages as $anInboundMessageItem) {
         $message = new Message($anInboundMessageItem);
         $message->save();
+
+        $result .= $message->conversation_id . "-" . $message->hash . " OK\n";
       }
+      $result = rtrim($result, "\n");
     }else
       $result = "inboundMessages empty";
 
     Log::channel("appdebug")->info($result);
-    return response()->json($inboundMessages);
+    return response()->json($result);
   });
 });
