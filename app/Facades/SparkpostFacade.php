@@ -1,8 +1,8 @@
 <?php
 namespace App\Facades;
 
-use Goutte\Client;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class SparkpostFacade{
   static function parseInboundMessages(Request $request){
@@ -15,12 +15,20 @@ class SparkpostFacade{
         $inboundMessages[] = [
           "to" => $value->msys->relay_message->rcpt_to
           , "from" => $value->msys->relay_message->msg_from
-          , "subject" => $value->msys->relay_message->content->subject
+          , "subject" => self::getBaseSubject($value->msys->relay_message->content->subject)
+          , "origSubject" => $value->msys->relay_message->content->subject
           , "content" => $value->msys->relay_message->content->text
         ];
       }
     }
 
     return $inboundMessages;
+  }
+
+  private static function getBaseSubject($subject){
+    $string = str_ireplace("re:", "", $subject);
+    $string = Str::squish($string);
+
+    return $string;
   }
 }
