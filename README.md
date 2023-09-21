@@ -11,6 +11,7 @@
 ### database queue
 ```
 .env
+  DB_CONNECTION=sqlite
   DB_DATABASE=/absolute/path/to/database.sqlite
   QUEUE_CONNECTION=database
 
