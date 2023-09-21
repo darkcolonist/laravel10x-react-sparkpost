@@ -9,7 +9,7 @@ export default function(){
   React.useEffect(() => {
     async function fetchConversations(){
       const loaded = await axios.post('sparkpost/conversations');
-      console.debug(loaded.data);
+      // console.debug(loaded.data);
       setConversations(loaded.data);
       setConversationsLoaded(true);
     }
