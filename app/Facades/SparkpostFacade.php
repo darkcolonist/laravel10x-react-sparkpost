@@ -16,13 +16,35 @@ class SparkpostFacade{
           "to" => $value->msys->relay_message->rcpt_to
           , "from" => $value->msys->relay_message->msg_from
           , "subject" => self::getBaseSubject($value->msys->relay_message->content->subject)
-          , "origSubject" => $value->msys->relay_message->content->subject
+          , "meta" => json_encode([
+            "origSubject" => $value->msys->relay_message->content->subject
+          ])
           , "content" => $value->msys->relay_message->content->text
+          , "direction" => "in"
         ];
       }
     }
 
     return $inboundMessages;
+  }
+
+  static function generateConversationID($subject, $to, $from){
+    $subject = self::getBaseSubject($subject);
+    $arr = [$subject, $to, $from];
+    sort($arr);
+    $merged = implode($arr);
+    $lowered = strtolower($merged);
+
+    $formatted = Str::slug($lowered);
+
+    // $conversationID = uuid_create(UUID_TYPE_NAME, $formatted, $formatted);
+    // $conversationID = sha1($formatted);
+    // $conversationID = hash('sha256', $formatted);
+    // $conversationID = bin2hex($formatted);
+    // $conversationID = dechex(crc32($formatted)); // has collisions up to 4 billion
+    $conversationID = md5($formatted); // best option so far
+
+    return $conversationID;
   }
 
   private static function getBaseSubject($subject){

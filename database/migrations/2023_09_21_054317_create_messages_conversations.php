@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::create('messages', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
+            $table->string('conversation_id', 32)->index();
+            $table->string('hash', 32)->index();
             $table->string('subject')->index();
             $table->string('to')->index();
             $table->string('from')->index();

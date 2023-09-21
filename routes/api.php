@@ -1,6 +1,7 @@
 <?php
 
 use App\Facades\SparkpostFacade;
+use App\Models\Message;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
@@ -29,11 +30,16 @@ Route::middleware(['auth.sparkpost'])->prefix('sparkpost')->group(function () {
     $inboundMessages = SparkpostFacade::parseInboundMessages(request());
     $result;
 
-    if(count($inboundMessages))
+    if(count($inboundMessages)){
       $result = json_encode([
         $inboundMessages
       ], JSON_PRETTY_PRINT);
-    else
+
+      foreach ($inboundMessages as $anInboundMessageItem) {
+        $message = new Message($anInboundMessageItem);
+        $message->save();
+      }
+    }else
       $result = "inboundMessages empty";
 
     Log::channel("appdebug")->info($result);
