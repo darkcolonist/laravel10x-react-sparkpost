@@ -24,3 +24,6 @@ Route::prefix('message')->group(function(){
 
   // Route::get('history', [App\Http\Controllers\MessagesController::class, 'history']); // testing only
 });
+
+Route::get('sparkpost/conversations', [App\Http\Controllers\SparkpostMessageController::class, 'conversations']);
+Route::resource('sparkpost', App\Http\Controllers\SparkpostMessageController::class);
