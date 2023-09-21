@@ -26,11 +26,11 @@ class SparkpostWebhookAuth
         ->exactly($request->header(self::TOKEN_HEADER));
 
       if(!$authenticated){
-        Log::channel('appdebug')->info([
+        Log::channel('appdebug')->info(json_encode([
           'sparkpost api failure'
           , $request->ip()
           , self::TOKEN_HEADER.":".$request->header(self::TOKEN_HEADER)
-        ]);
+        ], JSON_PRETTY_PRINT));
         return response('unauthorized', 401);
       }
 

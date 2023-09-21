@@ -1,5 +1,6 @@
 <?php
 
+use App\Facades\SparkpostFacade;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
@@ -25,11 +26,17 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::middleware(['auth.sparkpost'])->prefix('sparkpost')->group(function () {
   Route::post('receive', function(){
-    $payLoad = json_decode(request()->getContent(), true);
+    $inboundMessages = SparkpostFacade::parseInboundMessages(request());
+    $result;
 
-    Log::channel("appdebug")->info([
-      $payLoad
-    ]);
-    return "it works";
+    if(count($inboundMessages))
+      $result = json_encode([
+        $inboundMessages
+      ], JSON_PRETTY_PRINT);
+    else
+      $result = "inboundMessages empty";
+
+    Log::channel("appdebug")->info($result);
+    return response()->json($inboundMessages);
   });
 });
