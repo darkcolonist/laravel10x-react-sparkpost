@@ -64,10 +64,6 @@ class SparkpostMessageController extends Controller
     }
 
     public function conversations(){
-      return Message::select(['conversation_id', 'subject', 'to', 'from', 'created_at'])
-        ->groupBy('conversation_id')
-        ->orderBy('created_at', 'desc')
-        ->limit(20)
-        ->get();
+      return Message::conversations();
     }
 }
