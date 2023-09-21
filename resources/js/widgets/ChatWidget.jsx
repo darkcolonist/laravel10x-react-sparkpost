@@ -12,6 +12,7 @@ import { Chip, Typography } from '@mui/material';
 import ChatWidgetFooterActions from '../components/ChatWidgetFooterActions';
 import EnvHelper from '../helpers/EnvHelper';
 import DebugLogContainer from '../components/DebugLogContainer';
+import ConversationsList from '../components/ConversationsList';
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -48,6 +49,8 @@ export default function ChatWidget() {
               }
             }}>
               <ChatWidgetProfileCard name="Random Person from FMyLife" description="The daily struggle guy" bgcolor={red[500]} />
+
+              <ConversationsList />
             </Grid>
 
             <Grid item xs={12} md={8}>
