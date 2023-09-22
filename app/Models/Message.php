@@ -23,17 +23,22 @@ class Message extends Model
   }
 
   public static function conversations(){
-    return
-    Message::select(
-      [
-        'conversation_id', 'subject', 'to', 'from', 'created_at'
-        , DB::raw('COUNT(id) as total')
-        , DB::raw('SUM(CASE WHEN direction = "in" THEN 1 ELSE 0 END) as total_in')
-        , DB::raw('SUM(CASE WHEN direction = "out" THEN 1 ELSE 0 END) as total_out')
-      ]
-    )
-      ->groupBy('conversation_id')
-      ->orderBy('id', 'desc')
+    return DB::table('messages')
+      ->select([
+        'messages.conversation_id',
+        'messages.subject',
+        'messages.to',
+        'messages.from',
+        'messages.created_at',
+        DB::raw('COUNT(messages.id) as total'),
+        DB::raw('SUM(CASE WHEN messages.direction = "in" THEN 1 ELSE 0 END) as total_in'),
+        DB::raw('SUM(CASE WHEN messages.direction = "out" THEN 1 ELSE 0 END) as total_out')
+      ])
+      ->join(DB::raw('(SELECT MAX(created_at) AS max_created_at, conversation_id FROM messages GROUP BY conversation_id) latest'), function ($join) {
+        $join->on('messages.conversation_id', '=', 'latest.conversation_id');
+        $join->on('messages.created_at', '=', 'latest.max_created_at');
+      })
+      ->orderBy('messages.id', 'desc')
       ->limit(20)
       ->get();
   }
