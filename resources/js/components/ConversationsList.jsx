@@ -1,15 +1,30 @@
-import { Avatar, Divider, List, ListItem, ListItemAvatar, ListItemButton, ListItemText, Paper, Stack, Typography } from "@mui/material";
+import { Avatar
+  , Divider
+  , List
+  , ListItem
+  , ListItemAvatar
+  , ListItemButton
+  , ListItemText
+  , Paper
+  , Typography } from "@mui/material";
 import React from "react";
 import Moment from "./Moment";
 import StringHelper from "../helpers/StringHelper";
+import { useNavigate } from "react-router-dom";
 
 export default function(){
   const [conversationsLoaded,setConversationsLoaded] = React.useState(false);
   const [conversations,setConversations] = React.useState([]);
 
+  const navigate = useNavigate();
+
+  const handleConversationClick = conversationHash => {
+    navigate(`/conversation/${conversationHash}`);
+  }
+
   React.useEffect(() => {
     async function fetchConversations(){
-      const loaded = await axios.post('sparkpost/conversations');
+      const loaded = await axios.post('/sparkpost/conversations');
       // console.debug(loaded.data);
       setConversations(loaded.data);
       setConversationsLoaded(true);
@@ -29,7 +44,9 @@ export default function(){
               <ListItem key={conversationIndex} disablePadding>
                 <ListItemButton title={conversation.latest_message.from
                   + " & " + conversation.latest_message.to
-                  + ": " + conversation.latest_message.subject}>
+                  + ": " + conversation.latest_message.subject}
+
+                  onClick={() => handleConversationClick(conversation.conversation_id)}>
                   <ListItemAvatar>
                     <Avatar>{conversation.total}</Avatar>
                   </ListItemAvatar>

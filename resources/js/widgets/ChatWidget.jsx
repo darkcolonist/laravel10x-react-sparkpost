@@ -13,6 +13,7 @@ import ChatWidgetFooterActions from '../components/ChatWidgetFooterActions';
 import EnvHelper from '../helpers/EnvHelper';
 import DebugLogContainer from '../components/DebugLogContainer';
 import ConversationsList from '../components/ConversationsList';
+import { Outlet, Route, Routes } from 'react-router-dom';
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -54,9 +55,17 @@ export default function ChatWidget() {
             </Grid>
 
             <Grid item xs={12} md={8}>
-              <ChatWidgetCenterThread {...{
+              {/* <ChatWidgetCenterThread {...{
                 shouldPlaySound
-              }} />
+              }} /> */}
+              <Routes>
+                <Route path="/conversation" element={<Outlet />}>
+                    <Route path=":hash" element={<ChatWidgetCenterThread {...{
+                      shouldPlaySound
+                    }} />}
+                  />
+                </Route>
+              </Routes>
             </Grid>
 
             <Grid item xs={2} sx={{

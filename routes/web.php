@@ -13,10 +13,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('react');
-});
-
 Route::prefix('message')->group(function(){
   Route::post('send', [App\Http\Controllers\MessagesController::class, 'send']);
   Route::post('history', [App\Http\Controllers\MessagesController::class, 'history']);
@@ -27,3 +23,7 @@ Route::prefix('message')->group(function(){
 
 Route::post('sparkpost/conversations', [App\Http\Controllers\SparkpostMessageController::class, 'conversations']);
 Route::resource('sparkpost', App\Http\Controllers\SparkpostMessageController::class);
+
+Route::get('/{any}', function () {
+  return view('react');
+})->where('any', '.*');
