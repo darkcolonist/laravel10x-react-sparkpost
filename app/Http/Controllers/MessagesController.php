@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Facades\ConversationFacade;
 use App\Facades\FMLFacade;
+use App\Models\Message;
 use Illuminate\Http\Request;
 
 class MessagesController extends Controller
@@ -28,7 +29,8 @@ class MessagesController extends Controller
 
   public function history()
   {
-    $messages = ConversationFacade::history(session()->getId());
+    // $messages = ConversationFacade::history(session()->getId());
+    $messages = Message::getMessagesByConversation(request()->input('conversation'));
     return response()->json($messages, 200);
   }
 

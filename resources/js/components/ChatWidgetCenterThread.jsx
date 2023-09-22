@@ -96,8 +96,8 @@ export default function ChatWidgetCenterThread({shouldPlaySound}){
 
   const messageSamples = [
     // { type: "info", message: "this is a note", time: PAGE_LOAD },
-    { type: "out", message: "What to do?", time: PAGE_LOAD },
-    { type: "in", message: WELCOME_MESSAGE, time: PAGE_LOAD },
+    // { type: "out", message: "What to do?", time: PAGE_LOAD },
+    // { type: "in", message: WELCOME_MESSAGE, time: PAGE_LOAD },
 
 
     /* test fill-ins */
@@ -141,6 +141,8 @@ export default function ChatWidgetCenterThread({shouldPlaySound}){
   React.useEffect(() => {
     setMessages(messageSamples); // for testing and development only
 
+    appendToMessages({ type: "info", message: `viewing conversation ${conversationHash}`, time: PAGE_LOAD });
+
     // Function to handle window resize event
     const handleResize = () => {
       setListHeight(getListHeight()); // Update the list height when window is resized
@@ -160,10 +162,19 @@ export default function ChatWidgetCenterThread({shouldPlaySound}){
     };
   }, []);
 
-  const fetchMessageHistory = async () => {
-    const { data } = await axios.post('/message/history');
+  React.useEffect(() => {
+    setMessages([]); // clear
+    appendToMessages({ type: "info", message: `viewing conversation ${conversationHash}`, time: PAGE_LOAD });
+    fetchMessageHistory(conversationHash);
+  },[conversationHash]);
+
+  const fetchMessageHistory = async (conversationHash) => {
+    const { data } = await axios.post('/message/history', {
+      conversation: conversationHash
+    });
 
     if (ArrayHelper.isNonEmptyArray(data)) {
+      data.reverse();
       data.forEach((newMessage) => {
         const formattedMessage = formatMessage(newMessage);
         appendToMessages(formattedMessage);
@@ -256,8 +267,11 @@ export default function ChatWidgetCenterThread({shouldPlaySound}){
     if (typeof message === 'object' && message !== null && 'direction' in message)
       message.type = message.direction;
 
-    if (typeof message === 'object' && message !== null && 'timestamp' in message)
-      message.time = message.timestamp;
+    if (typeof message === 'object' && message !== null && 'created_at' in message)
+      message.time = message.created_at;
+
+    if (typeof message === 'object' && message !== null && 'content' in message)
+      message.message = message.content;
 
     return message;
   }

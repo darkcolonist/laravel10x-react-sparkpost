@@ -83,4 +83,11 @@ class Message extends Model
 
     return $recentConversations;
   }
+
+  public static function getMessagesByConversation($conversationId){
+    return Message::where('conversation_id', $conversationId)
+      ->orderBy('id', 'desc')
+      ->limit(50)
+      ->get();
+  }
 }
