@@ -50,7 +50,11 @@ export default function ChatWidget() {
               }
             }}>
               <ChatWidgetProfileCard name="Random Person from FMyLife" description="The daily struggle guy" bgcolor={red[500]} />
-              <ConversationsList />
+
+              <Routes>
+                <Route path="/conversation/:conversationHash" element={<ConversationsList />}/>
+                <Route path="/" element={<ConversationsList />} />
+              </Routes>
             </Grid>
 
             <Grid item xs={12} md={8}>

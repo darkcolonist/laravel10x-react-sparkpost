@@ -10,15 +10,14 @@ import { Avatar
 import React from "react";
 import Moment from "./Moment";
 import StringHelper from "../helpers/StringHelper";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 export default function(){
   const [conversationsLoaded,setConversationsLoaded] = React.useState(false);
   const [conversations,setConversations] = React.useState([]);
 
-  const location = useLocation();
+  const { conversationHash } = useParams();
   const navigate = useNavigate();
-
   const handleConversationClick = to => {
     navigate(to);
   }
@@ -46,12 +45,11 @@ export default function(){
           <List>
             <ListItem>Recent Conversations</ListItem>
             {conversations.map((conversation, conversationIndex) => (
-              <ListItem key={conversationIndex} disablePadding
-                selected={location.pathname === conversation.url}>
+              <ListItem key={conversationIndex} disablePadding>
                 <ListItemButton title={conversation.latest_message.from
                   + " & " + conversation.latest_message.to
                   + ": " + conversation.latest_message.subject}
-
+                  selected={conversationHash === conversation.conversation_id}
                   onClick={() => handleConversationClick(conversation.url)}>
                   <ListItemAvatar>
                     <Avatar>{conversation.total}</Avatar>
