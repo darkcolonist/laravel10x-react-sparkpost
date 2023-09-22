@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
+use Carbon\Carbon;
+
 class Message extends Model
 {
   use HasFactory;
@@ -40,7 +42,7 @@ class Message extends Model
 
   public static function latestMessages($conversationIds)
   {
-    return DB::table('messages')
+    $messages = DB::table('messages')
     ->select([
       'conversation_id',
       'subject',
@@ -57,6 +59,13 @@ class Message extends Model
       })
       ->orderBy('id', 'desc')
       ->get();
+
+    // Format the created_at field using Carbon
+    foreach ($messages as $message) {
+      $message->created_at = Carbon::parse($message->created_at);
+    }
+
+    return $messages;
   }
 
   public static function getConversationsWithLatestMessages()

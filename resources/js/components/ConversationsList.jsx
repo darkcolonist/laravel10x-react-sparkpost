@@ -26,14 +26,14 @@ export default function(){
             <ListItem>Recent Conversations</ListItem>
             {conversations.map((conversation, conversationIndex) => (
               <ListItem key={conversationIndex} disablePadding>
-                <ListItemButton title={conversation.latest_message.from + " & " + conversation.latest_message.to + ": " + conversation.latest_message.content}>
+                <ListItemButton title={conversation.latest_message.from + " & " + conversation.latest_message.to}>
                   <ListItemAvatar>
                     <Avatar>{conversation.total}</Avatar>
                   </ListItemAvatar>
                   <ListItemText primary={conversation.latest_message.subject} secondary={
                     <React.Fragment>
-                      <Typography variant="span">{conversation.total_in} / {conversation.total_out}</Typography>
-                      {" "}
+                      <Typography variant="code">↓ {conversation.total_in} ↑ {conversation.total_out}</Typography>
+                      {' - '}
                       <Moment format="fromNow">{conversation.latest_message.created_at}</Moment>
                     </React.Fragment>
                   } />
