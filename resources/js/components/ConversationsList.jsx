@@ -10,22 +10,27 @@ import { Avatar
 import React from "react";
 import Moment from "./Moment";
 import StringHelper from "../helpers/StringHelper";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 export default function(){
   const [conversationsLoaded,setConversationsLoaded] = React.useState(false);
   const [conversations,setConversations] = React.useState([]);
 
+  const location = useLocation();
   const navigate = useNavigate();
 
-  const handleConversationClick = conversationHash => {
-    navigate(`/conversation/${conversationHash}`);
+  const handleConversationClick = to => {
+    navigate(to);
   }
 
   React.useEffect(() => {
     async function fetchConversations(){
       const loaded = await axios.post('/sparkpost/conversations');
-      // console.debug(loaded.data);
+
+      loaded.data.map((conversationItem, i) => {
+        conversationItem.url = `/conversation/${conversationItem.conversation_id}`;
+      });
+
       setConversations(loaded.data);
       setConversationsLoaded(true);
     }
@@ -41,12 +46,13 @@ export default function(){
           <List>
             <ListItem>Recent Conversations</ListItem>
             {conversations.map((conversation, conversationIndex) => (
-              <ListItem key={conversationIndex} disablePadding>
+              <ListItem key={conversationIndex} disablePadding
+                selected={location.pathname === conversation.url}>
                 <ListItemButton title={conversation.latest_message.from
                   + " & " + conversation.latest_message.to
                   + ": " + conversation.latest_message.subject}
 
-                  onClick={() => handleConversationClick(conversation.conversation_id)}>
+                  onClick={() => handleConversationClick(conversation.url)}>
                   <ListItemAvatar>
                     <Avatar>{conversation.total}</Avatar>
                   </ListItemAvatar>

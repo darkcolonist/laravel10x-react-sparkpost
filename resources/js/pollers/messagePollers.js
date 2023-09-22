@@ -28,7 +28,7 @@ async function fetchLatest(callback){
 
     // console.info(postParams);
 
-    const response = await axios.post('message/fetch', postParams);
+    const response = await axios.post('/message/fetch', postParams);
 
     // Process the response or perform any required actions
     // Call the callback function if it's provided and is a function

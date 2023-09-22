@@ -50,20 +50,17 @@ export default function ChatWidget() {
               }
             }}>
               <ChatWidgetProfileCard name="Random Person from FMyLife" description="The daily struggle guy" bgcolor={red[500]} />
-
               <ConversationsList />
             </Grid>
 
             <Grid item xs={12} md={8}>
-              {/* <ChatWidgetCenterThread {...{
-                shouldPlaySound
-              }} /> */}
               <Routes>
-                <Route path="/conversation" element={<Outlet />}>
-                    <Route path=":hash" element={<ChatWidgetCenterThread {...{
+                <Route path="/" element={<Outlet />}>
+                  <Route path="/conversation/:conversationHash" element={<ChatWidgetCenterThread {...{
                       shouldPlaySound
                     }} />}
                   />
+                  <Route path="/" element={<Typography>Please select a conversation to proceed.</Typography>} />
                 </Route>
               </Routes>
             </Grid>

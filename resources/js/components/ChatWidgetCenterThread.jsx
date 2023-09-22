@@ -10,6 +10,7 @@ import { setFetchLatestLastMessageID, startFetchLatest, stopFetchLatest } from "
 import ArrayHelper from "../helpers/ArrayHelper";
 import uniqid from "uniqid";
 import { MomentTooltip } from "./Moment";
+import { useParams } from "react-router-dom";
 
 const WELCOME_MESSAGE = `hello there, ${APP_VISITOR}. just type a message to see what happens.`;
 
@@ -37,7 +38,6 @@ const OtherListItem = function (props) {
   </ListItem>
 }
 
-
 const MeListItem = function (props) {
   return <ListItem className="messageListItem authorIsMe">
     <Paper elevation={10}>
@@ -46,6 +46,12 @@ const MeListItem = function (props) {
 
     <MessageSentStatus {...props} />
 
+  </ListItem>
+}
+
+const InfoListItem = function (props) {
+  return <ListItem style={{ display: 'flex', justifyContent: 'center' }}>
+    <em style={{opacity: .3}}>{props.message}</em>
   </ListItem>
 }
 
@@ -69,6 +75,8 @@ const MessageListItem = function (props){
   let OurComponent;
   if(props.type === "in")
     OurComponent = OtherListItem;
+  else if(props.type === 'info')
+    OurComponent = InfoListItem;
   else
     OurComponent = MeListItem;
 
@@ -84,12 +92,10 @@ export default function ChatWidgetCenterThread({shouldPlaySound}){
   const messageListRef = useRef(null);
   const audioRef = useRef(null);
 
+  const { conversationHash } = useParams();
+
   const messageSamples = [
-    // /* MeListItem */    { type:"out", message: "Hey man, What's up ?", time: "09:30"},
-    // /* OtherListItem */ { type:"in", message: "Hey, Iam Good! What about you ?", time: "09:31"},
-    // /* MeListItem */    { type:"out", message: "Cool. i am good, let's catch up!", time: "10:30"},
-    // /* OtherListItem */ { type:"in", message: "sure thing", time: "10:30"},
-    // /* MeListItem */    { type:"out", message: "ayt sounds like a plan", time: "10:31"},
+    // { type: "info", message: "this is a note", time: PAGE_LOAD },
     { type: "out", message: "What to do?", time: PAGE_LOAD },
     { type: "in", message: WELCOME_MESSAGE, time: PAGE_LOAD },
 
@@ -145,6 +151,8 @@ export default function ChatWidgetCenterThread({shouldPlaySound}){
 
     fetchMessageHistory();
 
+    // console.debug('current conversation', conversationHash);
+
     // Clean up the event listener when component is unmounted
     return () => {
       window.removeEventListener('resize', handleResize);
@@ -153,7 +161,7 @@ export default function ChatWidgetCenterThread({shouldPlaySound}){
   }, []);
 
   const fetchMessageHistory = async () => {
-    const { data } = await axios.post('message/history');
+    const { data } = await axios.post('/message/history');
 
     if (ArrayHelper.isNonEmptyArray(data)) {
       data.forEach((newMessage) => {
