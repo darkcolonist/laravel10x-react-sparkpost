@@ -1,6 +1,7 @@
 import { Avatar, Divider, List, ListItem, ListItemAvatar, ListItemButton, ListItemText, Paper, Stack, Typography } from "@mui/material";
 import React from "react";
 import Moment from "./Moment";
+import StringHelper from "../helpers/StringHelper";
 
 export default function(){
   const [conversationsLoaded,setConversationsLoaded] = React.useState(false);
@@ -26,11 +27,14 @@ export default function(){
             <ListItem>Recent Conversations</ListItem>
             {conversations.map((conversation, conversationIndex) => (
               <ListItem key={conversationIndex} disablePadding>
-                <ListItemButton title={conversation.latest_message.from + " & " + conversation.latest_message.to}>
+                <ListItemButton title={conversation.latest_message.from
+                  + " & " + conversation.latest_message.to
+                  + ": " + conversation.latest_message.subject}>
                   <ListItemAvatar>
                     <Avatar>{conversation.total}</Avatar>
                   </ListItemAvatar>
-                  <ListItemText primary={conversation.latest_message.subject} secondary={
+                  <ListItemText primary={StringHelper.truncateString(conversation.latest_message.subject, 10)}
+                    secondary={
                     <React.Fragment>
                       <Typography variant="code">↓ {conversation.total_in} ↑ {conversation.total_out}</Typography>
                       {' - '}
