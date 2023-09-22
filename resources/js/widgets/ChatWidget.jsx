@@ -52,8 +52,7 @@ export default function ChatWidget() {
               <ChatWidgetProfileCard name="Random Person from FMyLife" description="The daily struggle guy" bgcolor={red[500]} />
 
               <Routes>
-                <Route path="/conversation/:conversationHash" element={<ConversationsList />}/>
-                <Route path="/" element={<ConversationsList />} />
+                <Route path="/conversation?/:conversationHash?" element={<ConversationsList />}/>
               </Routes>
             </Grid>
 
@@ -64,7 +63,7 @@ export default function ChatWidget() {
                       shouldPlaySound
                     }} />}
                   />
-                  <Route path="/" element={<Typography>Please select a conversation to proceed.</Typography>} />
+                  <Route path="/conversation?" element={<Typography>Please select a conversation to proceed.</Typography>} />
                 </Route>
               </Routes>
             </Grid>
