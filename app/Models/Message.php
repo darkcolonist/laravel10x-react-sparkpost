@@ -23,23 +23,40 @@ class Message extends Model
   }
 
   public static function conversations(){
-    return DB::table('messages')
+    // First query: Fetch recent conversations with counts
+    $recentConversations = DB::table('messages')
       ->select([
-        'messages.conversation_id',
-        'messages.subject',
-        'messages.to',
-        'messages.from',
-        'messages.created_at',
-        DB::raw('COUNT(messages.id) as total'),
-        DB::raw('SUM(CASE WHEN messages.direction = "in" THEN 1 ELSE 0 END) as total_in'),
-        DB::raw('SUM(CASE WHEN messages.direction = "out" THEN 1 ELSE 0 END) as total_out')
+        'conversation_id',
+        DB::raw('COUNT(id) as total'),
+        DB::raw('SUM(CASE WHEN direction = "in" THEN 1 ELSE 0 END) as total_in'),
+        DB::raw('SUM(CASE WHEN direction = "out" THEN 1 ELSE 0 END) as total_out'),
       ])
-      ->join(DB::raw('(SELECT MAX(created_at) AS max_created_at, conversation_id FROM messages GROUP BY conversation_id) latest'), function ($join) {
-        $join->on('messages.conversation_id', '=', 'latest.conversation_id');
-        $join->on('messages.created_at', '=', 'latest.max_created_at');
-      })
-      ->orderBy('messages.id', 'desc')
+      ->groupBy('conversation_id')
+      ->orderBy('created_at', 'desc')
       ->limit(20)
       ->get();
+
+    // Second query: Fetch latest messages for recent conversations
+    $conversationIds = $recentConversations->pluck('conversation_id');
+    $latestMessages = DB::table('messages')
+      ->select([
+        'conversation_id',
+        'subject',
+        'to',
+        'from',
+        'created_at',
+      ])
+      ->whereIn('conversation_id', $conversationIds)
+      ->orderBy('created_at', 'desc')
+      ->get();
+
+    // Combine conversation data with latest messages
+    foreach ($recentConversations as $conversation) {
+      $conversation->latest_message = $latestMessages
+        ->where('conversation_id', $conversation->conversation_id)
+        ->first();
+    }
+
+    return $recentConversations;
   }
 }
