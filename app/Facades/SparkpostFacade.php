@@ -3,6 +3,7 @@ namespace App\Facades;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
 
 class SparkpostFacade{
   static function parseInboundMessages(Request $request){
@@ -55,6 +56,13 @@ class SparkpostFacade{
   }
 
   public static function sendOutbound($from, $to, $subject, $content){
-    return;
+    $fromName = config('app.name');
+    Mail::raw($content, function ($content) use ($to, $subject, $from, $fromName) {
+      $content->to($to)
+        ->from($from, $fromName)
+        ->subject($subject);
+    });
+
+    return "Email sent successfully!";
   }
 }

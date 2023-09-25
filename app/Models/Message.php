@@ -112,7 +112,7 @@ class Message extends Model
     SparkpostFacade::sendOutbound(
       $message->from
       , $message->to
-      , $message->subject
+      , "Re: ".$message->subject
       , $message->content
     );
 
