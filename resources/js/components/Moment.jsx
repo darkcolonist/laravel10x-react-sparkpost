@@ -6,7 +6,7 @@ export const FORMAT_FROMNOW = 'fromNow';
 
 export function MomentTooltip({ datetime, format, children, ...props }) {
   const extendedProps = {...props,
-    title: moment(datetime).format(format)
+    title: moment(new Date(datetime)).format(format)
   }
 
   return <Tooltip {...extendedProps}>{children}</Tooltip>
