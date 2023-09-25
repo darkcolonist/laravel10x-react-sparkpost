@@ -90,4 +90,39 @@ class Message extends Model
       ->limit(50)
       ->get();
   }
+
+  private static function getLastMessageFromConversationByDirection($conversationId, $direction = 'in'){
+    return Message::where('conversation_id', $conversationId)
+      ->where('direction', $direction)
+      ->orderBy('id', 'desc')
+      ->first();
+  }
+
+  public static function respondToConversation($rawPostMessage){
+    $lastInbound = self::getLastMessageFromConversationByDirection($rawPostMessage["conversation_id"], 'in');
+
+    $message = new Message([
+      'to' => $lastInbound['from']
+      , 'from' => $lastInbound['to']
+      , 'subject' => $lastInbound['subject']
+      , 'direction' => 'out'
+      , 'content' => $rawPostMessage['message']
+    ]);
+
+    SparkpostFacade::sendOutbound(
+      $message->from
+      , $message->to
+      , $message->subject
+      , $message->content
+    );
+
+    $message->save();
+
+    return [
+      ...$rawPostMessage
+      , "time" => Carbon::now()
+      // , "last_inbound" => $lastInbound
+      // , "messageOBJ" => $message
+    ];
+  }
 }

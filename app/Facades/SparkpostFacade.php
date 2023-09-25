@@ -53,4 +53,8 @@ class SparkpostFacade{
 
     return $string;
   }
+
+  public static function sendOutbound($from, $to, $subject, $content){
+    return;
+  }
 }

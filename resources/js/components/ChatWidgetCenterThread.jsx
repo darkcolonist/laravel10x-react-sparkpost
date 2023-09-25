@@ -330,6 +330,7 @@ export default function ChatWidgetCenterThread({shouldPlaySound}){
   }
 
   const submitMessageToServer = async (newMessage) => {
+    newMessage['conversation_id'] = conversationHash;
     newMessage["status"] = "sending";
     newMessage["clientSideMessageID"] = clientSideMessageID;
     newMessage["id"] = clientSideMessageID;
@@ -339,7 +340,7 @@ export default function ChatWidgetCenterThread({shouldPlaySound}){
     appendToMessages(newMessage);
 
     try{
-      const axiosResponse = await axios.post('message/send', newMessage);
+      const axiosResponse = await axios.post('/message/send', newMessage);
 
       // change check mark of send message to green
       setSendingMessageToSent(setMessages, { ...newMessage, ...axiosResponse.data });
