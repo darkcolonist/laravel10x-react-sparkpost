@@ -1,5 +1,6 @@
 let fetchLatestEnabled = false;
 let fetchLatestLastMessageID = 1;
+let cancelAxiosSource;
 
 export function startFetchLatest(callback){
   console.info('fetchLatest poller started');
@@ -10,6 +11,8 @@ export function startFetchLatest(callback){
 export function stopFetchLatest(){
   console.info('fetchLatest poller stopped');
   fetchLatestEnabled = false;
+  if(cancelAxiosSource)
+    cancelAxiosSource.cancel('poller cancelled');
 }
 
 export function setFetchLatestLastMessageID(lastMessageID){
@@ -17,6 +20,8 @@ export function setFetchLatestLastMessageID(lastMessageID){
 }
 
 async function fetchLatest(callback){
+  cancelAxiosSource = axios.CancelToken.source();
+
   // Stop polling if the 'stopPolling' flag is set to true
   if(!fetchLatestEnabled) return;
 
@@ -28,7 +33,9 @@ async function fetchLatest(callback){
 
     // console.info(postParams);
 
-    const response = await axios.post('/message/fetch', postParams);
+    const response = await axios.post('/message/fetch', postParams, {
+      cancelToken: cancelAxiosSource.token,
+    });
 
     // Process the response or perform any required actions
     // Call the callback function if it's provided and is a function

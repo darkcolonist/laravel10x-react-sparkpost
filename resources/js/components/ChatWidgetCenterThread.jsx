@@ -137,7 +137,11 @@ export default function ChatWidgetCenterThread({shouldPlaySound}){
       stopFetchLatest();
       setIsFormDisabled(true);
     }
-  },[messageHistoryLoaded]);
+
+    return () => {
+      stopFetchLatest();
+    };
+  }, [messageHistoryLoaded]);
 
   React.useEffect(() => {
     setMessages(messageSamples); // for testing and development only
