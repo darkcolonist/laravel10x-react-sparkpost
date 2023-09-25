@@ -14,6 +14,7 @@ import EnvHelper from '../helpers/EnvHelper';
 import DebugLogContainer from '../components/DebugLogContainer';
 import ConversationsList from '../components/ConversationsList';
 import { Outlet, Route, Routes } from 'react-router-dom';
+import { useCurrentConversationStore } from '../helpers/StateHelper';
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -24,7 +25,7 @@ const Item = styled(Paper)(({ theme }) => ({
 }));
 
 export default function ChatWidget() {
-
+  const currentConversation = useCurrentConversationStore();
   const [shouldPlaySound,setShouldPlaySound] = React.useState(false);
 
   const headerFooter = <React.Fragment>
@@ -49,8 +50,9 @@ export default function ChatWidget() {
                 md: "block"
               }
             }}>
-              <ChatWidgetProfileCard name="Random Person from FMyLife" description="The daily struggle guy" bgcolor={red[500]} />
-
+              {currentConversation.conversationID
+                ? <ChatWidgetProfileCard name={currentConversation.from} description={"Subject: "+currentConversation.subject} bgcolor={red[500]} />
+                : null}
               <Routes>
                 <Route path="/conversation?/:conversationHash?" element={<ConversationsList />}/>
               </Routes>
@@ -74,7 +76,9 @@ export default function ChatWidget() {
                 md: "block"
               }
             }}>
-              <ChatWidgetProfileCard name="Operator" description="This is you" bgcolor={blue[300]} />
+              {currentConversation.conversationID
+                ? <ChatWidgetProfileCard name={currentConversation.to} description="This is you" bgcolor={blue[300]} />
+                : null}
             </Grid>
           </Grid>
 

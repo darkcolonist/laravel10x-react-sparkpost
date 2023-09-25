@@ -31,7 +31,11 @@ class MessagesController extends Controller
   {
     // $messages = ConversationFacade::history(session()->getId());
     $messages = Message::getMessagesByConversation(request()->input('conversation'));
-    return response()->json($messages, 200);
+
+    if(count($messages))
+      return response()->json($messages, 200);
+
+    return response()->json("empty resultset", 404);
   }
 
   /**

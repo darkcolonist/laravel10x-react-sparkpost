@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import Grid from '@mui/material/Grid';
-import { Button, Divider, Fab, List, ListItem, Paper, TextField, Typography } from '@mui/material';
+import { Button, Divider, Fab, LinearProgress, List, ListItem, Paper, TextField, Typography } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import CircleIcon from '@mui/icons-material/RadioButtonUnchecked';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -11,6 +11,7 @@ import ArrayHelper from "../helpers/ArrayHelper";
 import uniqid from "uniqid";
 import { MomentTooltip } from "./Moment";
 import { useParams } from "react-router-dom";
+import { useCurrentConversationStore } from "../helpers/StateHelper";
 
 const WELCOME_MESSAGE = `hello there, ${APP_VISITOR}. just type a message to see what happens.`;
 
@@ -151,7 +152,7 @@ export default function ChatWidgetCenterThread({shouldPlaySound}){
     // Add event listener for window resize
     window.addEventListener('resize', handleResize);
 
-    fetchMessageHistory();
+    // fetchMessageHistory();
 
     // console.debug('current conversation', conversationHash);
 
@@ -164,23 +165,39 @@ export default function ChatWidgetCenterThread({shouldPlaySound}){
 
   React.useEffect(() => {
     setMessages([]); // clear
-    appendToMessages({ type: "info", message: `viewing conversation ${conversationHash}`, time: PAGE_LOAD });
     fetchMessageHistory(conversationHash);
   },[conversationHash]);
 
   const fetchMessageHistory = async (conversationHash) => {
+    setMessageHistoryLoaded(false);
     const { data } = await axios.post('/message/history', {
       conversation: conversationHash
     });
 
+    let lastInboundMessage = null;
+
     if (ArrayHelper.isNonEmptyArray(data)) {
+      appendToMessages({ type: "info", message: `viewing conversation ${conversationHash}`, time: PAGE_LOAD });
       data.reverse();
       data.forEach((newMessage) => {
         const formattedMessage = formatMessage(newMessage);
         appendToMessages(formattedMessage);
+
+        if(newMessage.direction === 'in')
+          lastInboundMessage = newMessage;
       });
 
       setFetchLatestLastMessageID(data[data.length - 1].id);
+
+      // console.debug(lastInboundMessage);
+      if(lastInboundMessage){
+        useCurrentConversationStore.setState({
+          to: lastInboundMessage.to
+          , from: lastInboundMessage.from
+          , subject: lastInboundMessage.subject
+          , conversationID: lastInboundMessage.conversation_id
+        });
+      }
     }
     setMessageHistoryLoaded(true);
   }
@@ -353,36 +370,37 @@ export default function ChatWidgetCenterThread({shouldPlaySound}){
     messageRef.current.value = '';
   }
 
-  return (
-    <React.Fragment>
-      <List className='messageArea' spacing={2}
-        ref={messageListRef}
-        sx={{
-          height: listHeight,
-          overflow: "auto"
-        }}
-      >
-        {messages.map((item, i) => (
-          <MessageListItem key={i} {...item} />
-        ))}
-      </List>
+  return !messageHistoryLoaded
+      ? <LinearProgress />
+      : <React.Fragment>
+          <List className='messageArea' spacing={2}
+            ref={messageListRef}
+            sx={{
+              height: listHeight,
+              overflow: "auto"
+            }}
+          >
+            {messages.map((item, i) => (
+              <MessageListItem key={i} {...item} />
+            ))}
+          </List>
 
-      <Divider />
-      <Grid container style={{ padding: '20px' }}
-        component="form" onSubmit={handleSubmit}>
-        <Grid item xs={11}>
-          <audio ref={audioRef}>
-            <source src={`${APP_URL}/assets/sounds/ding.mp3`} type="audio/mpeg" />
-          </audio>
-          <TextField id="outlined-basic-message-text" label="Type Something" fullWidth
-            autoComplete="off"
-            inputRef={messageRef} />
-        </Grid>
-        <Grid item xs={1} align="right">
-          <Fab disabled={isFormDisabled} color="primary"
-            aria-label="add" component={Button} type="submit"><SendIcon /></Fab>
-        </Grid>
-      </Grid>
-    </React.Fragment>
-  )
+          <Divider />
+          <Grid container style={{ padding: '20px' }}
+            component="form" onSubmit={handleSubmit}>
+            <Grid item xs={11}>
+              <audio ref={audioRef}>
+                <source src={`${APP_URL}/assets/sounds/ding.mp3`} type="audio/mpeg" />
+              </audio>
+              <TextField id="outlined-basic-message-text" label="Type Something" fullWidth
+                autoComplete="off"
+                inputRef={messageRef} />
+            </Grid>
+            <Grid item xs={1} align="right">
+              <Fab disabled={isFormDisabled} color="primary"
+                aria-label="add" component={Button} type="submit"><SendIcon /></Fab>
+            </Grid>
+          </Grid>
+        </React.Fragment>
+
 }

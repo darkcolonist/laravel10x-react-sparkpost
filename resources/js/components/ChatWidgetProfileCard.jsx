@@ -5,6 +5,7 @@ import CardContent from '@mui/material/CardContent';
 import Avatar from '@mui/material/Avatar';
 import Typography from '@mui/material/Typography';
 import { red } from '@mui/material/colors';
+import StringHelper from '../helpers/StringHelper';
 
 export default function({
   name, description, bgcolor
@@ -15,7 +16,9 @@ export default function({
         avatar={
           <Avatar sx={{ bgcolor }} aria-label={name}>{name[0]}</Avatar>
         }
-        title={name}
+        title={<span title={name}>
+          {StringHelper.truncateString(name, 12)}
+        </span>}
       />
       <CardContent>
         <Typography variant="body2" color="text.secondary">
