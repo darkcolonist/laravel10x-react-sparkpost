@@ -54,7 +54,7 @@ export default function(){
                   <ListItemAvatar>
                     <Avatar>{conversation.total}</Avatar>
                   </ListItemAvatar>
-                  <ListItemText primary={StringHelper.truncateString(conversation.latest_message.subject, 10)}
+                  <ListItemText primary={StringHelper.addElipsis(conversation.latest_message.subject, 7)}
                     secondary={
                     <React.Fragment>
                       <Typography variant="code">↓ {conversation.total_in} ↑ {conversation.total_out}</Typography>

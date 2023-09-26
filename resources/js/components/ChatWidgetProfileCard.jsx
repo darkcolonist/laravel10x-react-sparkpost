@@ -17,7 +17,7 @@ export default function({
           <Avatar sx={{ bgcolor }} aria-label={name}>{name[0]}</Avatar>
         }
         title={<span title={name}>
-          {StringHelper.truncateString(name, 12)}
+          {StringHelper.addElipsis(name, 10)}
         </span>}
       />
       <CardContent>
