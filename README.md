@@ -8,6 +8,16 @@
 </p>
 
 ## Laravel10x + React + Sparkpost In And Out Simulation
+### sparkpost process
+* create sending domain
+* verify sending domain (DKIM/SPF)
+* begin setting up inbound domain
+* add mx records
+* create inbound domain using rest api client (i used postman)
+* create relay webhook using rest api client (i used postman)
+* send an email to domain
+* verify that endpoint receives email
+
 ### database queue
 ```
 .env
