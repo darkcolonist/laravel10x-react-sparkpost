@@ -57,7 +57,9 @@ const InfoListItem = function (props) {
 }
 
 const MessageSentStatus = function(props){
-  if(props.status === undefined)
+  if(props.status === undefined
+    || props.status === 'active'
+    || props.status === 'inactive')
     return;
 
   let content;
