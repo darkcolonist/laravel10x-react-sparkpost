@@ -3,6 +3,7 @@
 use App\Facades\SparkpostFacade;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Hash;
 
 /*
 |--------------------------------------------------------------------------
@@ -53,3 +54,7 @@ Artisan::command('test:conversationID', function () {
     "someone@example.net"
   ));
 })->purpose('Display an inspiring quote');
+
+Artisan::command('password:generate {password}', function () {
+  $this->comment(Hash::make($this->argument('password')));
+})->describe('Generate a password from plaintext');

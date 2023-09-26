@@ -13,6 +13,11 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::get('/auth/google', [App\Http\Controllers\SocialAuthGoogleController::class, 'redirect']);
+Route::get('/auth/google/callback', [App\Http\Controllers\SocialAuthGoogleController::class, 'callback']);
+Route::get('/auth/google/logout', [App\Http\Controllers\SocialAuthGoogleController::class, 'logout']);
+Route::get('/auth/google/whoami', [App\Http\Controllers\SocialAuthGoogleController::class, 'whoami']);
+
 Route::prefix('message')->group(function(){
   Route::post('send', [App\Http\Controllers\MessagesController::class, 'send']);
   Route::post('history', [App\Http\Controllers\MessagesController::class, 'history']);
