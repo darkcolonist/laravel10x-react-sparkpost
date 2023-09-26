@@ -6,3 +6,9 @@ export const useCurrentConversationStore = create((set) => ({
   subject: null,
   conversationID: null,
 }));
+
+export const useAuthStore = create((set) => ({
+  email: null,
+  name: null,
+  avatar: null,
+}));
