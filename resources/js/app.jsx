@@ -1,5 +1,5 @@
 import { ThemeProvider } from '@mui/material/styles';
-import { CssBaseline } from '@mui/material';
+import { CssBaseline, LinearProgress } from '@mui/material';
 import ChatWidget from './widgets/ChatWidget';
 import defaultTheme from './themes/defaultTheme';
 import { BrowserRouter } from 'react-router-dom';
@@ -17,7 +17,7 @@ export default function() {
         <AxiosInterceptor />
         <Authenticator
           authorized={<ChatWidget />}
-          loading={<span>checking if you are logged in</span>}
+          loading={<LinearProgress />}
           unauthorized={<LoginSection />}
         />
       </ThemeProvider>

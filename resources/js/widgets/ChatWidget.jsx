@@ -16,6 +16,7 @@ import ConversationsList from '../components/ConversationsList';
 import { Outlet, Route, Routes } from 'react-router-dom';
 import { useCurrentConversationStore } from '../helpers/StateHelper';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import Header from '../components/Header';
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -29,17 +30,11 @@ export default function ChatWidget() {
   const currentConversation = useCurrentConversationStore();
   const [shouldPlaySound,setShouldPlaySound] = React.useState(false);
 
-  const headerFooter = <React.Fragment>
-    <Typography variant='span'>{APP_NAME}</Typography>
-    <Typography variant='span'>{' '}</Typography>
-    <Chip variant='outlined' className='sessionContainer' size='small' label={`session id ${SessionHelper.getSessionID()}`} />
-  </React.Fragment>;
-
   return (
     <Box sx={{ flexGrow: 1 }}>
       <Grid container spacing={2}>
         <Grid item xs={12}>
-          <Item>{headerFooter}</Item>
+          <Item><Header /></Item>
         </Grid>
 
         <Grid item xs={12}>
