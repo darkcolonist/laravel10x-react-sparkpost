@@ -87,7 +87,8 @@ const MessageListItem = function (props){
 }
 
 const getListHeight = () => {
-  return window.innerHeight - 225;
+  // return window.innerHeight - 225;
+  return window.innerHeight - 235; // this is due to changing title from <span> to <h6>
 }
 
 export default function ChatWidgetCenterThread({shouldPlaySound}){
