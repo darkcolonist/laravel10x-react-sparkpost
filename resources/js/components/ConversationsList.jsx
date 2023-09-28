@@ -40,7 +40,7 @@ export default function(){
 
   return <React.Fragment>
     <AxiosPoller
-      source="/sparkpost/conversations"
+      source="/sparkpost/conversations?polling"
       callback={(data) => {
         console.debug('data received from poller', data);
       }}

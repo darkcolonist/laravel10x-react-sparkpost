@@ -103,11 +103,11 @@ class Message extends Model
       return collect($item)->only(['conversation_id', 'last_id']);
     });
 
-    $conversationsInDb = self::recentConversationsSlim();
-
-    $equal = CollectionHelper::areEqual($conversationsCollection, $conversationsInDb);
-
     while (true) {
+      $conversationsInDb = self::recentConversationsSlim();
+
+      $equal = CollectionHelper::areEqual($conversationsCollection, $conversationsInDb);
+
       if(!$equal)
         return self::getConversationsWithLatestMessagesInitial();
 
