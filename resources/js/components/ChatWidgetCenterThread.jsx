@@ -6,14 +6,11 @@ import CircleIcon from '@mui/icons-material/RadioButtonUnchecked';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorCircleIcon from '@mui/icons-material/ErrorOutline';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import { setFetchLatestLastMessageID, startFetchLatest, stopFetchLatest } from "../pollers/messagePollers";
 import ArrayHelper from "../helpers/ArrayHelper";
 import uniqid from "uniqid";
 import { MomentTooltip } from "./Moment";
 import { useParams } from "react-router-dom";
 import { useCurrentConversationStore } from "../helpers/StateHelper";
-
-const WELCOME_MESSAGE = `hello there, ${APP_VISITOR}. just type a message to see what happens.`;
 
 const MessageCardContent = function(props){
   return (
@@ -134,15 +131,15 @@ export default function ChatWidgetCenterThread({shouldPlaySound}){
   React.useEffect(() => {
     if(messageHistoryLoaded){
       // Start the long polling loop
-      startFetchLatest(newMessagesReceivedFromServer);
+      // startFetchLatest(newMessagesReceivedFromServer);
       setIsFormDisabled(false);
     }else{
-      stopFetchLatest();
+      // stopFetchLatest();
       setIsFormDisabled(true);
     }
 
     return () => {
-      stopFetchLatest();
+      // stopFetchLatest();
     };
   }, [messageHistoryLoaded]);
 
@@ -166,7 +163,7 @@ export default function ChatWidgetCenterThread({shouldPlaySound}){
     // Clean up the event listener when component is unmounted
     return () => {
       window.removeEventListener('resize', handleResize);
-      stopFetchLatest();
+      // stopFetchLatest();
     };
   }, []);
 
@@ -185,7 +182,9 @@ export default function ChatWidgetCenterThread({shouldPlaySound}){
 
     if (ArrayHelper.isNonEmptyArray(data)) {
       appendToMessages({ type: "info", message: `viewing conversation ${conversationHash}`, time: PAGE_LOAD });
+      useCurrentConversationStore.setState({lastLoadedMessageID: data[0].id});
       data.reverse();
+
       data.forEach((newMessage) => {
         const formattedMessage = formatMessage(newMessage);
         appendToMessages(formattedMessage);
@@ -194,7 +193,7 @@ export default function ChatWidgetCenterThread({shouldPlaySound}){
           lastInboundMessage = newMessage;
       });
 
-      setFetchLatestLastMessageID(data[data.length - 1].id);
+      // setFetchLatestLastMessageID(data[data.length - 1].id);
 
       // console.debug(lastInboundMessage);
       if(lastInboundMessage){
@@ -311,7 +310,7 @@ export default function ChatWidgetCenterThread({shouldPlaySound}){
 
       const lastMessageInList = newMessages[newMessages.length - 1];
 
-      setFetchLatestLastMessageID(lastMessageInList.id);
+      // setFetchLatestLastMessageID(lastMessageInList.id);
 
       if (lastMessageInList.type === 'in'){
         setIsFormDisabled(false);

@@ -6,7 +6,7 @@ import Grid from '@mui/material/Grid';
 import ChatWidgetCenterThread from '../components/ChatWidgetCenterThread';
 import ChatWidgetProfileCard from '../components/ChatWidgetProfileCard';
 import { blue, red } from '@mui/material/colors';
-import SessionHelper from '../helpers/SessionHelper';
+// import SessionHelper from '../helpers/SessionHelper';
 // import DateTimeHelper from '../helpers/DateTimeHelper';
 import { Chip, Button, Typography } from '@mui/material';
 import ChatWidgetFooterActions from '../components/ChatWidgetFooterActions';

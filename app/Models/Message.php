@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Facades\SparkpostFacade;
+use App\Helpers\CollectionHelper;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -22,6 +23,17 @@ class Message extends Model
       $message->conversation_id = SparkpostFacade::generateConversationID($message->subject, $message->to, $message->from);
       $message->hash = uniqid();
     });
+  }
+
+  private static function recentConversationsSlim(){
+    return DB::table('messages')
+    ->select([
+      'conversation_id',
+      DB::raw('MAX(id) as last_id')])
+      ->groupBy('conversation_id')
+      ->orderBy('last_id', 'desc')
+      ->limit(20)
+      ->get();
   }
 
   public static function recentConversations()
@@ -68,8 +80,7 @@ class Message extends Model
     return $messages;
   }
 
-  public static function getConversationsWithLatestMessages()
-  {
+  private static function getConversationsWithLatestMessagesInitial(){
     $recentConversations = self::recentConversations();
     $conversationIds = $recentConversations->pluck('conversation_id');
     $latestMessages = self::latestMessages($conversationIds);
@@ -82,6 +93,42 @@ class Message extends Model
     }
 
     return $recentConversations;
+  }
+
+  private static function getConversationsWithLatestMessagesContinue($conversations){
+    $startTime = time();
+    $timeout = config("app.long_polling_max_duration"); // Timeout in seconds
+
+    $conversationsCollection = collect($conversations)->map(function($item){
+      return collect($item)->only(['conversation_id', 'last_id']);
+    });
+
+    $conversationsInDb = self::recentConversationsSlim();
+
+    $equal = CollectionHelper::areEqual($conversationsCollection, $conversationsInDb);
+
+    while (true) {
+      if(!$equal)
+        return self::getConversationsWithLatestMessagesInitial();
+
+      // Check if the time limit has exceeded
+      $elapsedTime = time() - $startTime;
+      if ($elapsedTime >= $timeout) {
+        break; // Exit the loop if the time limit is reached
+      }
+
+      sleep(1); // Sleep for 1 second before the next iteration
+    }
+  }
+
+  public static function getConversationsWithLatestMessages()
+  {
+    $conversationsLoadedArray = request()->get('conversations');
+    if(is_array($conversationsLoadedArray)){
+      return self::getConversationsWithLatestMessagesContinue($conversationsLoadedArray);
+    }
+
+    return self::getConversationsWithLatestMessagesInitial();
   }
 
   public static function getMessagesByConversation($conversationId){
