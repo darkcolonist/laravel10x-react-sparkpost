@@ -13,29 +13,19 @@ class MessagesController extends Controller
   {
     return response()->json(Message::respondToConversation(request()->all())
       , 200);
-
-    // $message = ConversationFacade::send([
-    //   "message" => request()->get('message'),
-    //   "meta" => [
-    //     "clientSideMessageID" => request()->get('clientSideMessageID')
-    //   ]
-    // ], session()->getId());
-
-    // return response()->json($message, 200);
   }
 
-  /**
-   * TODO not implemented
-   */
-  public function fetch()
-  {
-    $lastMessage = ConversationFacade::fetch(session()->getId(), request()->get('lastID'));
-    return response()->json($lastMessage, 200);
-  }
+  // /**
+  //  * TODO not implemented
+  //  */
+  // public function fetch()
+  // {
+  //   $lastMessage = ConversationFacade::fetch(session()->getId(), request()->get('lastID'));
+  //   return response()->json($lastMessage, 200);
+  // }
 
   public function history()
   {
-    // $messages = ConversationFacade::history(session()->getId());
     $messages = Message::getMessagesByConversation(request()->input('conversation'));
 
     if(count($messages))

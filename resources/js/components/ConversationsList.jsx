@@ -27,7 +27,7 @@ export default function(){
   React.useEffect(() => {
     setPoller(<AxiosPoller
       pollerParams={{
-        source:"/sparkpost/conversations?polling#kew"
+        source:"/sparkpost/conversations?polling"
         , callback:(loadedConversations) => {
           if(!loadedConversations)
             return;

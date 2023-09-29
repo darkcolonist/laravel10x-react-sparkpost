@@ -131,11 +131,42 @@ class Message extends Model
     return self::getConversationsWithLatestMessagesInitial();
   }
 
-  public static function getMessagesByConversation($conversationId){
+  private static function getMessagesByConversationInitial($conversationId){
     return Message::where('conversation_id', $conversationId)
       ->orderBy('id', 'desc')
       ->limit(50)
       ->get();
+  }
+
+  private static function getMessagesByConversationContinue($conversationId, $historyLoadedArray){
+    $startTime = time();
+    $timeout = config("app.long_polling_max_duration"); // Timeout in seconds
+
+    while (true) {
+      $historyInDB = self::getMessagesByConversationInitial($conversationId);
+
+      $equal = CollectionHelper::areEqual($historyLoadedArray, $historyInDB);
+
+      if (!$equal)
+        return self::getMessagesByConversationInitial($conversationId);
+
+      // Check if the time limit has exceeded
+      $elapsedTime = time() - $startTime;
+      if ($elapsedTime >= $timeout) {
+        break; // Exit the loop if the time limit is reached
+      }
+
+      sleep(1); // Sleep for 1 second before the next iteration
+    }
+  }
+
+  public static function getMessagesByConversation($conversationId){
+    $historyLoadedArray = request()->get('history');
+    if (is_array($historyLoadedArray)) {
+      return self::getMessagesByConversationContinue($conversationId, $historyLoadedArray);
+    }
+
+    return self::getMessagesByConversationInitial($conversationId);
   }
 
   private static function getLastMessageFromConversationByDirection($conversationId, $direction = 'in'){
