@@ -38,24 +38,10 @@ export default function(){
 
           setConversations(loadedConversations);
           setConversationsLoaded(true);
-          // console.debug('data received from poller', data);
         }
         , postParameterName: 'conversations'
       }}
     />);
-
-    // async function fetchConversations(){
-    //   const loaded = await axios.post('/sparkpost/conversations');
-
-    //   loaded.data.map((conversationItem, i) => {
-    //     conversationItem.url = `/conversation/${conversationItem.conversation_id}`;
-    //   });
-
-    //   setConversations(loaded.data);
-    //   setConversationsLoaded(true);
-    // }
-
-    // fetchConversations();
   },[]);
 
   return <React.Fragment>
