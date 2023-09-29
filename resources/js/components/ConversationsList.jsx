@@ -16,6 +16,7 @@ import AxiosPoller from "../pollers/AxiosPoller";
 export default function(){
   const [conversationsLoaded,setConversationsLoaded] = React.useState(false);
   const [conversations,setConversations] = React.useState([]);
+  const [poller,setPoller] = React.useState(null);
 
   const { conversationHash } = useParams();
   const navigate = useNavigate();
@@ -24,29 +25,41 @@ export default function(){
   }
 
   React.useEffect(() => {
-    async function fetchConversations(){
-      const loaded = await axios.post('/sparkpost/conversations');
+    setPoller(<AxiosPoller
+      pollerParams={{
+        source:"/sparkpost/conversations?polling#kew"
+        , callback:(loadedConversations) => {
+          if(!loadedConversations)
+            return;
 
-      loaded.data.map((conversationItem, i) => {
-        conversationItem.url = `/conversation/${conversationItem.conversation_id}`;
-      });
+          loadedConversations.map((conversationItem, i) => {
+            conversationItem.url = `/conversation/${conversationItem.conversation_id}`;
+          });
 
-      setConversations(loaded.data);
-      setConversationsLoaded(true);
-    }
+          setConversations(loadedConversations);
+          setConversationsLoaded(true);
+          // console.debug('data received from poller', data);
+        }
+        , postParameterName: 'conversations'
+      }}
+    />);
 
-    fetchConversations();
+    // async function fetchConversations(){
+    //   const loaded = await axios.post('/sparkpost/conversations');
+
+    //   loaded.data.map((conversationItem, i) => {
+    //     conversationItem.url = `/conversation/${conversationItem.conversation_id}`;
+    //   });
+
+    //   setConversations(loaded.data);
+    //   setConversationsLoaded(true);
+    // }
+
+    // fetchConversations();
   },[]);
 
   return <React.Fragment>
-    <AxiosPoller
-      source="/sparkpost/conversations?polling"
-      callback={(data) => {
-        console.debug('data received from poller', data);
-      }}
-      pollInterval={5000}
-      postParams={{conversations}}
-    />
+    {poller}
     {conversationsLoaded ? (
       conversations.length ? (
         <React.Fragment>
