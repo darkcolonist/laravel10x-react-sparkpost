@@ -6,6 +6,14 @@ const Poller = React.memo((props) => {
   let lastID = null;
   let cancelAxiosSource;
 
+  const [newPollerData,setNewPollerData] = React.useState([]);
+
+  React.useEffect(() => {
+    if(typeof props.onNewUpdates === 'function'){
+      props.onNewUpdates(newPollerData);
+    }
+  },[newPollerData]);
+
   function startFetchLatest() {
     fetchLatestEnabled = true;
     fetchLatest();
@@ -22,8 +30,13 @@ const Poller = React.memo((props) => {
       if (response.data.lastID !== undefined) {
         return response.data.lastID;
       }
-      if (Array.isArray(response.data) && response.data.length > 0 && response.data[0].id !== undefined) {
-        return response.data[0].id;
+
+      let lastIndex = 0;
+      if (response.data.length > 0 && props.order !== undefined && props.order === "asc")
+        lastIndex = response.data.length - 1;
+
+      if (Array.isArray(response.data) && response.data.length > 0 && response.data[lastIndex].id !== undefined) {
+        return response.data[lastIndex].id;
       }
     }
     return lastID;
@@ -48,7 +61,11 @@ const Poller = React.memo((props) => {
         cancelToken: cancelAxiosSource.token,
       });
 
-      lastID = parseLastIDFromResponse(response);
+      const tmpLastID = parseLastIDFromResponse(response);
+      if(tmpLastID !== lastID){
+        setNewPollerData(response.data);
+        lastID = tmpLastID;
+      }
 
       setTimeout(fetchLatest, 1000);
     } catch (error) {
@@ -64,7 +81,7 @@ const Poller = React.memo((props) => {
       console.debug('poller ended', props.id);
       stopFetchLatest();
     }
-  }, [props]);
+  }, [props.url, props.post]);
 });
 
 export default function AppPollers(){
@@ -72,7 +89,8 @@ export default function AppPollers(){
 
   return <React.Fragment>
     {pollers.map(
-      (aPollerItem, i) => (<Poller key={i} {...aPollerItem} />)
+      (aPollerItem, i) => (<Poller key={i}
+        {...aPollerItem} />)
     )}
   </React.Fragment>
 };

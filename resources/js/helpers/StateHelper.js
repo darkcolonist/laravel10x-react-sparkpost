@@ -19,18 +19,11 @@ export const useLongPollerStore = create((set) => ({
    * {
    *   id: 'unique-name-for-your-poller`
    *   url: '/url/to/your/poller'
+   *   onNewUpdates: (data) => { console.debug(data) }
+   *   order: 'desc'
    * }
    */
   pollers: []
-
-  /**
-   * pollersData object
-   * {
-   *   id: 'unique-name-for-your-poller`
-   *   data: {}
-   * }
-   */
-  , pollersData: []
 
   , addPoller: (newPoller) => set(
     (state) => (
@@ -44,16 +37,23 @@ export const useLongPollerStore = create((set) => ({
     return poller;
   }
 
-  , getPollerData: (pollerID) => {
-    const poller = useLongPollerStore.getState().pollersData.find(
-      (poller) => poller.id === pollerID
+  , updatePoller: (pollerID, updates) => set((state) => {
+    const updatedPollers = state.pollers.map((poller) =>
+      poller.id === pollerID ? { ...poller, ...updates } : poller
     );
-    return poller;
-  }
 
-  , removePoller: (pollerID) =>
-    set((state) => ({
-      pollers: state.pollers.filter((poller) => poller.id !== pollerID),
-      pollersData: state.pollersData.filter((poller) => poller.id !== pollerID),
+    const found = updatedPollers.some((poller) => poller.id === pollerID);
+
+    if (!found) {
+      console.info(pollerID, 'poller missing');
+    }
+
+    return {
+      pollers: updatedPollers,
+    };
+  })
+
+  , removePoller: (pollerID) => set((state) => ({
+      pollers: state.pollers.filter((poller) => poller.id !== pollerID)
     })),
 }));
