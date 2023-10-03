@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import AppPollers from '../pollers/AppPollers';
+// import AppPollers from '../pollers/AppPollers';
 import { useLongPollerStore } from '../helpers/StateHelper';
 
 const MessageList = ({ messages }) => {
@@ -42,36 +42,40 @@ export default function() {
   const updatePoller = useLongPollerStore((state) => state.updatePoller);
 
   React.useEffect(() => {
-    addPoller({ id: "conversationsList", url: "/sparkpost/conversations" });
     addPoller({
       id: "messageHistory", url: "/message/history", post: {
         conversation: currentConversation
       }
       , onNewUpdates: (updates) => setCurrentMessages(updates)});
 
-    // setTimeout(() => {
-    //   setCurrentConversation('873abc1504f4284604773fc6b9ead56f');
-    // }, 5000);
+    setTimeout(() => {
+      addPoller({ id: "conversationsList", url: "/sparkpost/conversations" });
+    }, 5000);
 
     setTimeout(() => {
+      removePoller('conversationsList');
+    }, 15000);
+
+    setTimeout(() => {
+      // addPoller({
+      //   id: "messageHistory", url: "/message/history", post: {
+      //     conversation: '4d653e42e95f5de7f9e0f1e8c32ae953'
+      //   }});
       setCurrentConversation('4d653e42e95f5de7f9e0f1e8c32ae953');
     }, 20000);
 
     setTimeout(() => {
       removePoller('messageHistory');
-    }, 21500);
+    }, 41500);
 
     setTimeout(() => {
       setCurrentConversation('873abc1504f4284604773fc6b9ead56f');
-    }, 25000);
-
-    setTimeout(() => {
-      removePoller('conversationsList');
-    }, 15000);
+    }, 50000);
   },[]);
 
   return <React.Fragment>
-    <AppPollers />
+    {/* moving <AppPollers /> to AuthenticatedLayout.jsx */}
+    {/* <AppPollers /> */}
     {currentConversation
       ? `long polling test for ${currentConversation}`
       : 'waiting for conversation'}

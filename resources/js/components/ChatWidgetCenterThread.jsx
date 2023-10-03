@@ -10,7 +10,7 @@ import ArrayHelper from "../helpers/ArrayHelper";
 import uniqid from "uniqid";
 import { MomentTooltip } from "./Moment";
 import { useParams } from "react-router-dom";
-import { useCurrentConversationStore } from "../helpers/StateHelper";
+import { useCurrentConversationStore, useLongPollerStore } from "../helpers/StateHelper";
 
 const MessageCardContent = function(props){
   return (
@@ -93,6 +93,9 @@ export default function ChatWidgetCenterThread({shouldPlaySound}){
   const messageListRef = useRef(null);
   const audioRef = useRef(null);
 
+  const addPoller = useLongPollerStore((state) => state.addPoller);
+  const removePoller = useLongPollerStore((state) => state.removePoller);
+
   const { conversationHash } = useParams();
 
   const messageSamples = [
@@ -155,12 +158,6 @@ export default function ChatWidgetCenterThread({shouldPlaySound}){
 
     // Add event listener for window resize
     window.addEventListener('resize', handleResize);
-
-    // fetchMessageHistory();
-
-    // console.debug('current conversation', conversationHash);
-
-    // Clean up the event listener when component is unmounted
     return () => {
       window.removeEventListener('resize', handleResize);
       // stopFetchLatest();
@@ -169,8 +166,37 @@ export default function ChatWidgetCenterThread({shouldPlaySound}){
 
   React.useEffect(() => {
     setMessages([]); // clear
-    fetchMessageHistory(conversationHash);
+    appendToMessages({ type: "info", message: `viewing conversation ${conversationHash}`, time: PAGE_LOAD });
+    addPoller({
+      id: "messageHistory",
+      url: "/message/history",
+      post: {
+        conversation: conversationHash
+      },
+      onNewUpdates: (newMessages) => {
+        processDataIntoMessageHistory(newMessages);
+      }
+    });
   },[conversationHash]);
+
+  const processDataIntoMessageHistory = (messages) => {
+    // console.debug(messages);
+
+    let lastInboundMessage;
+
+    if (ArrayHelper.isNonEmptyArray(messages)) {
+      messages.reverse();
+      messages.forEach((newMessage) => {
+        const formattedMessage = formatMessage(newMessage);
+        appendToMessages(formattedMessage);
+
+        if (newMessage.direction === 'in')
+          lastInboundMessage = newMessage;
+      });
+    }
+
+    setMessageHistoryLoaded(true);
+  }
 
   const fetchMessageHistory = async (conversationHash) => {
     setMessageHistoryLoaded(false);

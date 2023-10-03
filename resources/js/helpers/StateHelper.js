@@ -25,10 +25,22 @@ export const useLongPollerStore = create((set) => ({
    */
   pollers: []
 
-  , addPoller: (newPoller) => set(
-    (state) => (
-      { pollers: [...state.pollers, newPoller] }
-    ))
+  , addPoller: (newPoller) => set((state) => {
+    const existingPoller = state.pollers.find(poller => poller.id === newPoller.id);
+
+    if (existingPoller) {
+      console.info('Poller with ID ' + newPoller.id + ' already exists. Updating instead.');
+      return {
+        pollers: state.pollers.map(poller =>
+          poller.id === newPoller.id ? { ...poller, ...newPoller } : poller
+        )
+      };
+    } else {
+      return {
+        pollers: [...state.pollers, newPoller]
+      };
+    }
+  })
 
   , getPoller: (pollerID) => {
     const poller = useLongPollerStore.getState().pollers.find(

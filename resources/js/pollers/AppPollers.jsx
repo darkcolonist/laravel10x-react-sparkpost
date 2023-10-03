@@ -5,6 +5,7 @@ const Poller = React.memo((props) => {
   let fetchLatestEnabled = false;
   let lastID = null;
   let cancelAxiosSource;
+  let iteration = 0;
 
   const [newPollerData,setNewPollerData] = React.useState([]);
 
@@ -57,7 +58,7 @@ const Poller = React.memo((props) => {
       if (props.post)
         postParams = { ...postParams, ...props.post };
 
-      const response = await axios.post(props.url, postParams, {
+      const response = await axios.post(props.url + '#i' + iteration++, postParams, {
         cancelToken: cancelAxiosSource.token,
       });
 
