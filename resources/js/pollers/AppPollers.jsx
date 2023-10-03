@@ -7,6 +7,8 @@ const Poller = React.memo((props) => {
   let cancelAxiosSource;
   let iteration = 0;
 
+  const { lastIDKey = "id"} = props;
+
   const [newPollerData,setNewPollerData] = React.useState([]);
 
   React.useEffect(() => {
@@ -27,20 +29,28 @@ const Poller = React.memo((props) => {
   }
 
   function parseLastIDFromResponse(response) {
+    let identifiedLastID = null
+
     if (response && response.data) {
       if (response.data.lastID !== undefined) {
-        return response.data.lastID;
+        identifiedLastID = response.data.lastID;
       }
 
       let lastIndex = 0;
       if (response.data.length > 0 && props.order !== undefined && props.order === "asc")
         lastIndex = response.data.length - 1;
 
-      if (Array.isArray(response.data) && response.data.length > 0 && response.data[lastIndex].id !== undefined) {
-        return response.data[lastIndex].id;
+      if (Array.isArray(response.data) && response.data.length > 0 && response.data[lastIndex][lastIDKey] !== undefined) {
+        identifiedLastID = response.data[lastIndex][lastIDKey];
       }
     }
-    return lastID;
+
+    if(identifiedLastID === null)
+      identifiedLastID = lastID;
+
+    // console.debug(identifiedLastID, lastIDKey);
+
+    return identifiedLastID;
   }
 
   async function fetchLatest() {

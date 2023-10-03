@@ -12,11 +12,14 @@ import Moment from "./Moment";
 import StringHelper from "../helpers/StringHelper";
 import { useNavigate, useParams } from "react-router-dom";
 import AxiosPoller from "../pollers/AxiosPoller";
+import { useLongPollerStore } from "../helpers/StateHelper";
 
 export default function(){
   const [conversationsLoaded,setConversationsLoaded] = React.useState(false);
   const [conversations,setConversations] = React.useState([]);
-  const [poller,setPoller] = React.useState(null);
+
+  const addPoller = useLongPollerStore((state) => state.addPoller);
+  const removePoller = useLongPollerStore((state) => state.removePoller);
 
   const { conversationHash } = useParams();
   const navigate = useNavigate();
@@ -24,28 +27,49 @@ export default function(){
     navigate(to);
   }
 
+  const newConversationsFound = (updatedConversations) => {
+    if (!updatedConversations) return;
+
+    updatedConversations.map((conversationItem, i) => {
+      conversationItem.url = `/conversation/${conversationItem.conversation_id}`;
+    });
+
+    setConversations(updatedConversations);
+    setConversationsLoaded(true);
+  }
+
   React.useEffect(() => {
-    setPoller(<AxiosPoller
-      pollerParams={{
-        source:"/sparkpost/conversations?polling"
-        , callback:(loadedConversations) => {
-          if(!loadedConversations)
-            return;
+    addPoller({
+      id: "conversationsList",
+      url: "/sparkpost/conversations",
+      // order: "asc",
+      lastIDKey: "last_id",
+      onNewUpdates: (newConversations) => newConversationsFound(newConversations)
+    });
 
-          loadedConversations.map((conversationItem, i) => {
-            conversationItem.url = `/conversation/${conversationItem.conversation_id}`;
-          });
+    return () => {
+      removePoller('conversationsList');
+    }
+    // setPoller(<AxiosPoller
+    //   pollerParams={{
+    //     source:"/sparkpost/conversations?polling"
+    //     , callback:(loadedConversations) => {
+    //       if(!loadedConversations)
+    //         return;
 
-          setConversations(loadedConversations);
-          setConversationsLoaded(true);
-        }
-        , postParameterName: 'conversations'
-      }}
-    />);
+    //       loadedConversations.map((conversationItem, i) => {
+    //         conversationItem.url = `/conversation/${conversationItem.conversation_id}`;
+    //       });
+
+    //       setConversations(loadedConversations);
+    //       setConversationsLoaded(true);
+    //     }
+    //     , postParameterName: 'conversations'
+    //   }}
+    // />);
   },[]);
 
   return <React.Fragment>
-    {poller}
     {conversationsLoaded ? (
       conversations.length ? (
         <React.Fragment>

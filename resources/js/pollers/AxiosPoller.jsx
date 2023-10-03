@@ -1,3 +1,8 @@
+/**
+ * DEPRECATED as of October 03, 2023 4:15 PM
+ * use AppPollers, check TestMessageHistoryLongPolling.jsx
+ */
+
 import React, { useEffect, useRef } from "react";
 
 const AxiosPoller = (props) => {
