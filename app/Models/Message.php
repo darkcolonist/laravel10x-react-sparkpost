@@ -210,11 +210,12 @@ class Message extends Model
 
     $message->save();
 
-    return [
-      ...$rawPostMessage
-      , "time" => Carbon::now()
-      // , "last_inbound" => $lastInbound
-      // , "messageOBJ" => $message
-    ];
+    return $message;
+    // return [
+    //   ...$rawPostMessage
+    //   , "time" => Carbon::now()
+    //   // , "last_inbound" => $lastInbound
+    //   // , "messageOBJ" => $message
+    // ];
   }
 }

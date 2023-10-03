@@ -76,10 +76,10 @@ const Poller = React.memo((props) => {
   }
 
   React.useEffect(() => {
-    console.debug('poller started', props.id);
+    // console.debug('poller started', props.id);
     startFetchLatest();
     return () => {
-      console.debug('poller ended', props.id);
+      // console.debug('poller ended', props.id);
       stopFetchLatest();
     }
   }, [props.url, props.post]);
