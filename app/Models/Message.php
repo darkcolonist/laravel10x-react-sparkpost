@@ -20,7 +20,7 @@ class Message extends Model
     parent::boot();
 
     static::creating(function ($message) {
-      $message->conversation_id = SparkpostFacade::generateConversationID($message->subject, $message->to, $message->from);
+      $message->conversation_id = SparkpostFacade::generateconversationID($message->subject, $message->to, $message->from);
       $message->hash = uniqid();
     });
   }
@@ -52,7 +52,7 @@ class Message extends Model
       ->get();
   }
 
-  public static function latestMessages($conversationIds)
+  public static function latestMessages($conversationIDs)
   {
     $messages = DB::table('messages')
     ->select([
@@ -63,10 +63,10 @@ class Message extends Model
       'content',
       'created_at',
     ])
-      ->whereIn('id', function ($query) use ($conversationIds) {
+      ->whereIn('id', function ($query) use ($conversationIDs) {
         $query->select(DB::raw('MAX(id)'))
         ->from('messages')
-        ->whereIn('conversation_id', $conversationIds)
+        ->whereIn('conversation_id', $conversationIDs)
           ->groupBy('conversation_id');
       })
       ->orderBy('id', 'desc')
@@ -82,8 +82,8 @@ class Message extends Model
 
   private static function getConversationsWithLatestMessagesInitial(){
     $recentConversations = self::recentConversations();
-    $conversationIds = $recentConversations->pluck('conversation_id');
-    $latestMessages = self::latestMessages($conversationIds);
+    $conversationIDs = $recentConversations->pluck('conversation_id');
+    $latestMessages = self::latestMessages($conversationIDs);
 
     // Combine conversation data with latest messages
     foreach ($recentConversations as $conversation) {
@@ -131,46 +131,60 @@ class Message extends Model
     return self::getConversationsWithLatestMessagesInitial();
   }
 
-  private static function getMessagesByConversationInitial($conversationId){
-    return Message::where('conversation_id', $conversationId)
+  private static function getMessagesByConversationInitial($conversationID){
+    return Message::where('conversation_id', $conversationID)
       ->orderBy('id', 'desc')
       ->limit(50)
       ->get();
   }
 
-  private static function getMessagesByConversationContinue($conversationId, $historyLoadedArray){
+  private static function getLastMessageByConversation($conversationID){
+    return Message::where('conversation_id', $conversationID)
+    ->orderBy('id', 'desc')
+    ->first();
+  }
+
+  private static function getNextMessagesByConversation($conversationID, $lastID)
+  {
+    return Message::where('conversation_id', $conversationID)
+      ->where('id', '>', $lastID)
+      ->orderBy('id', 'desc')
+      ->limit(50)
+      ->get();
+  }
+
+  private static function getMessagesByConversationPolling($conversationID, $lastID){
     $startTime = time();
     $timeout = config("app.long_polling_max_duration"); // Timeout in seconds
 
     while (true) {
-      $historyInDB = self::getMessagesByConversationInitial($conversationId);
+      $lastMessageInDB = self::getLastMessageByConversation($conversationID);
 
-      $equal = CollectionHelper::areEqual($historyLoadedArray, $historyInDB);
+      $equal = $lastMessageInDB->id === $lastID;
 
       if (!$equal)
-        return self::getMessagesByConversationInitial($conversationId);
+        return self::getNextMessagesByConversation($conversationID, $lastID);
 
       // Check if the time limit has exceeded
       $elapsedTime = time() - $startTime;
       if ($elapsedTime >= $timeout) {
-        break; // Exit the loop if the time limit is reached
+        return [];
       }
 
       sleep(1); // Sleep for 1 second before the next iteration
     }
   }
 
-  public static function getMessagesByConversation($conversationId){
-    $historyLoadedArray = request()->get('history');
-    if (is_array($historyLoadedArray)) {
-      return self::getMessagesByConversationContinue($conversationId, $historyLoadedArray);
+  public static function getMessagesByConversation($conversationID, $lastID = null){
+    if ($lastID) {
+      return self::getMessagesByConversationPolling($conversationID, $lastID);
     }
 
-    return self::getMessagesByConversationInitial($conversationId);
+    return self::getMessagesByConversationInitial($conversationID);
   }
 
-  private static function getLastMessageFromConversationByDirection($conversationId, $direction = 'in'){
-    return Message::where('conversation_id', $conversationId)
+  private static function getLastMessageFromConversationByDirection($conversationID, $direction = 'in'){
+    return Message::where('conversation_id', $conversationID)
       ->where('direction', $direction)
       ->orderBy('id', 'desc')
       ->first();

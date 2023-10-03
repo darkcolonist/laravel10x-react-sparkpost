@@ -26,12 +26,13 @@ class MessagesController extends Controller
 
   public function history()
   {
-    $messages = Message::getMessagesByConversation(request()->input('conversation'));
+    $messages = Message::getMessagesByConversation(request()->input('conversation'), request()->input('lastID'));
 
     if(count($messages))
-      return response()->json($messages, 200);
+      return response()->json($messages);
 
-    return response()->json("empty resultset", 404);
+    // no change of data detected but terminated long polling
+    return response()->json(0);
   }
 
   /**
