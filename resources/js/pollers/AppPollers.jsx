@@ -1,12 +1,10 @@
 import React from "react";
 import { useLongPollerStore } from "../helpers/StateHelper";
 
-function Poller(props){
+const Poller = React.memo((props) => {
   let fetchLatestEnabled = false;
   let lastID = null;
   let cancelAxiosSource;
-
-  const {  } = props;
 
   function startFetchLatest() {
     fetchLatestEnabled = true;
@@ -43,8 +41,8 @@ function Poller(props){
         lastID
       };
 
-      if(props.post)
-        postParams = {...postParams, ...props.post};
+      if (props.post)
+        postParams = { ...postParams, ...props.post };
 
       const response = await axios.post(props.url, postParams, {
         cancelToken: cancelAxiosSource.token,
@@ -66,21 +64,11 @@ function Poller(props){
       console.debug('poller ended', props.id);
       stopFetchLatest();
     }
-  },[props]);
-}
+  }, [props]);
+});
 
 export default function AppPollers(){
   const { pollers } = useLongPollerStore();
-
-  // const getPoller = useLongPollerStore((state) => state.getPoller);
-
-  // React.useEffect(() => {
-  //   console.debug('pollers changed', pollers)
-  // },[pollers]);
-
-  // React.useEffect(() => {
-  //   console.debug('messageHistory poller updated', getPoller("messageHistory"))
-  // },[getPoller("messageHistory")]);
 
   return <React.Fragment>
     {pollers.map(
