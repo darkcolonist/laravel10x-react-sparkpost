@@ -131,20 +131,20 @@ export default function ChatWidgetCenterThread({shouldPlaySound}){
     scrollToBottom();
   },[messages]);
 
-  React.useEffect(() => {
-    if(messageHistoryLoaded){
-      // Start the long polling loop
-      // startFetchLatest(newMessagesReceivedFromServer);
-      setIsFormDisabled(false);
-    }else{
-      // stopFetchLatest();
-      setIsFormDisabled(true);
-    }
+  // React.useEffect(() => {
+  //   // if(messageHistoryLoaded){
+  //   //   // Start the long polling loop
+  //   //   // startFetchLatest(newMessagesReceivedFromServer);
+  //   //   setIsFormDisabled(false);
+  //   // }else{
+  //   //   // stopFetchLatest();
+  //   //   setIsFormDisabled(true);
+  //   // }
 
-    return () => {
-      // stopFetchLatest();
-    };
-  }, [messageHistoryLoaded]);
+  //   return () => {
+  //     // stopFetchLatest();
+  //   };
+  // }, [messageHistoryLoaded]);
 
   React.useEffect(() => {
     setMessages(messageSamples); // for testing and development only
@@ -212,42 +212,6 @@ export default function ChatWidgetCenterThread({shouldPlaySound}){
     setMessageHistoryLoaded(true);
   }
 
-  // const fetchMessageHistory = async (conversationHash) => {
-  //   setMessageHistoryLoaded(false);
-  //   const { data } = await axios.post('/message/history', {
-  //     conversation: conversationHash
-  //   });
-
-  //   let lastInboundMessage = null;
-
-  //   if (ArrayHelper.isNonEmptyArray(data)) {
-  //     appendToMessages({ type: "info", message: `viewing conversation ${conversationHash}`, time: PAGE_LOAD });
-  //     useCurrentConversationStore.setState({lastLoadedMessageID: data[0].id});
-  //     data.reverse();
-
-  //     data.forEach((newMessage) => {
-  //       const formattedMessage = formatMessage(newMessage);
-  //       appendToMessages(formattedMessage);
-
-  //       if(newMessage.direction === 'in')
-  //         lastInboundMessage = newMessage;
-  //     });
-
-  //     // setFetchLatestLastMessageID(data[data.length - 1].id);
-
-  //     // console.debug(lastInboundMessage);
-  //     if(lastInboundMessage){
-  //       useCurrentConversationStore.setState({
-  //         to: lastInboundMessage.to
-  //         , from: lastInboundMessage.from
-  //         , subject: lastInboundMessage.subject
-  //         , conversationID: lastInboundMessage.conversation_id
-  //       });
-  //     }
-  //   }
-  //   setMessageHistoryLoaded(true);
-  // }
-
   const setSendingMessageToSent = (setMessages, theMessage) => {
     // console.debug(theMessage);
 
@@ -287,8 +251,13 @@ export default function ChatWidgetCenterThread({shouldPlaySound}){
   const appendToMessages = (newMessageObject) => {
     // console.info('appending', newMessageObject)
 
-    if(ONE_MESSAGE_AT_A_TIME && newMessageObject.type === "out")
-      setIsFormDisabled(true);
+    if(ONE_MESSAGE_AT_A_TIME){
+      // console.debug(newMessageObject.id, newMessageObject.type);
+      if(newMessageObject.type === "out")
+        setIsFormDisabled(true);
+      else
+        setIsFormDisabled(false);
+    }
 
     setMessages((prevMessages) => {
       // this is to prevent showing the message you already sent in
