@@ -131,20 +131,11 @@ export default function ChatWidgetCenterThread({shouldPlaySound}){
     scrollToBottom();
   },[messages]);
 
-  // React.useEffect(() => {
-  //   // if(messageHistoryLoaded){
-  //   //   // Start the long polling loop
-  //   //   // startFetchLatest(newMessagesReceivedFromServer);
-  //   //   setIsFormDisabled(false);
-  //   // }else{
-  //   //   // stopFetchLatest();
-  //   //   setIsFormDisabled(true);
-  //   // }
-
-  //   return () => {
-  //     // stopFetchLatest();
-  //   };
-  // }, [messageHistoryLoaded]);
+  React.useEffect(() => {
+    if(!ONE_MESSAGE_AT_A_TIME){
+      setIsFormDisabled(false);
+    }
+  }, [messageHistoryLoaded]);
 
   React.useEffect(() => {
     setMessages(messageSamples); // for testing and development only
@@ -260,13 +251,18 @@ export default function ChatWidgetCenterThread({shouldPlaySound}){
     }
 
     setMessages((prevMessages) => {
+      let duplicateItem;
       // this is to prevent showing the message you already sent in
       // your present chatbox
       const isDuplicate = prevMessages.some((message) => {
-        return message.id === newMessageObject.id;
+        if(message.id === newMessageObject.id){
+          duplicateItem = message;
+          return true;
+        }
       });
 
       if (isDuplicate) {
+        // console.debug('duplicate detected!', duplicateItem);
         // Message with duplicate ID already exists, return the current messages array
         return prevMessages;
       }
@@ -377,6 +373,7 @@ export default function ChatWidgetCenterThread({shouldPlaySound}){
               </audio>
               <TextField id="outlined-basic-message-text" label="Type Something" fullWidth
                 autoComplete="off"
+                autoFocus
                 inputRef={messageRef} />
             </Grid>
             <Grid item xs={1} align="right">
