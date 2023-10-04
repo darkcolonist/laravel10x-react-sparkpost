@@ -1,7 +1,46 @@
 {
+  "_jsx-runtime_commonjs-proxy-194eac7e.js": {
+    "file": "assets/jsx-runtime_commonjs-proxy-194eac7e.js",
+    "imports": [
+      "resources/js/bootstrap.jsx"
+    ]
+  },
   "resources/js/bootstrap.jsx": {
-    "file": "assets/bootstrap-55e30470.js",
+    "dynamicImports": [
+      "resources/js/layouts/AuthenticatedLayout.jsx",
+      "resources/js/components/LoginSection.jsx"
+    ],
+    "file": "assets/bootstrap-2c934fa5.js",
     "isEntry": true,
     "src": "resources/js/bootstrap.jsx"
+  },
+  "resources/js/components/LoginSection.jsx": {
+    "file": "assets/LoginSection-e074dceb.js",
+    "imports": [
+      "resources/js/bootstrap.jsx",
+      "_jsx-runtime_commonjs-proxy-194eac7e.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "resources/js/components/LoginSection.jsx"
+  },
+  "resources/js/components/TestMessageHistoryLongPolling.jsx": {
+    "file": "assets/TestMessageHistoryLongPolling-30ea069c.js",
+    "imports": [
+      "resources/js/bootstrap.jsx"
+    ],
+    "isDynamicEntry": true,
+    "src": "resources/js/components/TestMessageHistoryLongPolling.jsx"
+  },
+  "resources/js/layouts/AuthenticatedLayout.jsx": {
+    "dynamicImports": [
+      "resources/js/components/TestMessageHistoryLongPolling.jsx"
+    ],
+    "file": "assets/AuthenticatedLayout-beef3025.js",
+    "imports": [
+      "resources/js/bootstrap.jsx",
+      "_jsx-runtime_commonjs-proxy-194eac7e.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "resources/js/layouts/AuthenticatedLayout.jsx"
   }
 }

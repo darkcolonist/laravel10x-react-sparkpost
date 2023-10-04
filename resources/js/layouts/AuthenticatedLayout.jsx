@@ -1,8 +1,9 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
 import ChatWidget from "../widgets/ChatWidget";
-import TestMessageHistoryLongPolling from "../components/TestMessageHistoryLongPolling";
 import AppPollers from "../pollers/AppPollers";
+
+const TestMessageHistoryLongPolling = React.lazy(() => import('../components/TestMessageHistoryLongPolling'));
 
 export default function(){
   return <React.Fragment>
