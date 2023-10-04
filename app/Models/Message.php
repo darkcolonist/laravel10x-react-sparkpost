@@ -95,18 +95,14 @@ class Message extends Model
     return $recentConversations;
   }
 
-  private static function getConversationsWithLatestMessagesContinue($conversations){
+  private static function getConversationsWithLatestMessagesPolling($lastID){
     $startTime = time();
     $timeout = config("app.long_polling_max_duration"); // Timeout in seconds
 
-    $conversationsCollection = collect($conversations)->map(function($item){
-      return collect($item)->only(['conversation_id', 'last_id']);
-    });
-
     while (true) {
-      $conversationsInDb = self::recentConversationsSlim();
+      $lastMessageInDB = self::getLastMessage();
 
-      $equal = CollectionHelper::areEqual($conversationsCollection, $conversationsInDb);
+      $equal = $lastMessageInDB->id === $lastID;
 
       if(!$equal)
         return self::getConversationsWithLatestMessagesInitial();
@@ -121,11 +117,10 @@ class Message extends Model
     }
   }
 
-  public static function getConversationsWithLatestMessages()
+  public static function getConversationsWithLatestMessages($lastID = null)
   {
-    $conversationsLoadedArray = request()->get('conversations');
-    if(is_array($conversationsLoadedArray)){
-      return self::getConversationsWithLatestMessagesContinue($conversationsLoadedArray);
+    if($lastID){
+      return self::getConversationsWithLatestMessagesPolling($lastID);
     }
 
     return self::getConversationsWithLatestMessagesInitial();
@@ -142,6 +137,11 @@ class Message extends Model
     return Message::where('conversation_id', $conversationID)
     ->orderBy('id', 'desc')
     ->first();
+  }
+
+  private static function getLastMessage(){
+    return Message::orderBy('id', 'desc')
+      ->first();
   }
 
   private static function getNextMessagesByConversation($conversationID, $lastID)

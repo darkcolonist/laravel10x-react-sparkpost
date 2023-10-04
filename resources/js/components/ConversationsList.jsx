@@ -11,7 +11,6 @@ import React from "react";
 import Moment from "./Moment";
 import StringHelper from "../helpers/StringHelper";
 import { useNavigate, useParams } from "react-router-dom";
-import AxiosPoller from "../pollers/AxiosPoller";
 import { useLongPollerStore } from "../helpers/StateHelper";
 
 export default function(){
@@ -50,23 +49,6 @@ export default function(){
     return () => {
       removePoller('conversationsList');
     }
-    // setPoller(<AxiosPoller
-    //   pollerParams={{
-    //     source:"/sparkpost/conversations?polling"
-    //     , callback:(loadedConversations) => {
-    //       if(!loadedConversations)
-    //         return;
-
-    //       loadedConversations.map((conversationItem, i) => {
-    //         conversationItem.url = `/conversation/${conversationItem.conversation_id}`;
-    //       });
-
-    //       setConversations(loadedConversations);
-    //       setConversationsLoaded(true);
-    //     }
-    //     , postParameterName: 'conversations'
-    //   }}
-    // />);
   },[]);
 
   return <React.Fragment>
