@@ -48,7 +48,7 @@ class Message extends Model
     ])
       ->groupBy('conversation_id')
       ->orderBy('last_id', 'desc')
-      ->limit(20)
+      ->limit(5)
       ->get();
   }
 
