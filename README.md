@@ -30,3 +30,9 @@ bash
   php artisan migrate
   php artisan queue:work
 ```
+
+### useful links
+* https://support.sparkpost.com/docs/tech-resources/inbound-email-relay-webhook
+* https://developers.sparkpost.com/api/relay-webhooks/
+* https://developers.sparkpost.com/api/#header-endpoints
+* https://app.sparkpost.com/webhooks/details/26f4c480-56c7-11ee-b479-f5e781c43c13/test (requires sparkpost login)
