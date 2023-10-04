@@ -22,9 +22,6 @@ Route::group(['middleware' => ['auth']], function(){
   Route::prefix('message')->group(function(){
     Route::post('send', [App\Http\Controllers\MessagesController::class, 'send']);
     Route::post('history', [App\Http\Controllers\MessagesController::class, 'history']);
-    Route::post('fetch', [App\Http\Controllers\MessagesController::class, 'fetch']);
-
-    // Route::get('history', [App\Http\Controllers\MessagesController::class, 'history']); // testing only
   });
 
   Route::post('sparkpost/conversations', [App\Http\Controllers\SparkpostMessageController::class, 'conversations']);

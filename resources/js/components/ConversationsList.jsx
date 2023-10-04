@@ -11,10 +11,14 @@ import React from "react";
 import Moment from "./Moment";
 import StringHelper from "../helpers/StringHelper";
 import { useNavigate, useParams } from "react-router-dom";
+import { useLongPollerStore } from "../helpers/StateHelper";
 
 export default function(){
   const [conversationsLoaded,setConversationsLoaded] = React.useState(false);
   const [conversations,setConversations] = React.useState([]);
+
+  const addPoller = useLongPollerStore((state) => state.addPoller);
+  const removePoller = useLongPollerStore((state) => state.removePoller);
 
   const { conversationHash } = useParams();
   const navigate = useNavigate();
@@ -22,56 +26,68 @@ export default function(){
     navigate(to);
   }
 
+  const newConversationsFound = (updatedConversations) => {
+    if (!updatedConversations) return;
+
+    updatedConversations.map((conversationItem, i) => {
+      conversationItem.url = `/conversation/${conversationItem.conversation_id}`;
+    });
+
+    setConversations(updatedConversations);
+    setConversationsLoaded(true);
+  }
+
   React.useEffect(() => {
-    async function fetchConversations(){
-      const loaded = await axios.post('/sparkpost/conversations');
+    addPoller({
+      id: "conversationsList",
+      url: "/sparkpost/conversations",
+      // order: "asc",
+      lastIDKey: "last_id",
+      onNewUpdates: (newConversations) => newConversationsFound(newConversations)
+    });
 
-      loaded.data.map((conversationItem, i) => {
-        conversationItem.url = `/conversation/${conversationItem.conversation_id}`;
-      });
-
-      setConversations(loaded.data);
-      setConversationsLoaded(true);
+    return () => {
+      removePoller('conversationsList');
     }
-
-    fetchConversations();
   },[]);
 
-  return conversationsLoaded ? (
-    conversations.length ? (
-      <React.Fragment>
-        <Divider />
-        <Paper>
-          <List>
-            <ListItem>Recent Conversations</ListItem>
-            {conversations.map((conversation, conversationIndex) => (
-              <ListItem key={conversationIndex} disablePadding>
-                <ListItemButton title={conversation.latest_message.from
-                  + " & " + conversation.latest_message.to
-                  + ": " + conversation.latest_message.subject}
-                  selected={conversationHash === conversation.conversation_id}
-                  onClick={() => handleConversationClick(conversation.url)}>
-                  <ListItemAvatar>
-                    <Avatar>{conversation.total}</Avatar>
-                  </ListItemAvatar>
-                  <ListItemText primary={StringHelper.addElipsis(conversation.latest_message.subject, 7)}
-                    secondary={
-                    <React.Fragment>
-                      <Typography variant="code">↓ {conversation.total_in} ↑ {conversation.total_out}</Typography>
-                      {' - '}
-                      <Moment format="fromNow">{conversation.latest_message.created_at}</Moment>
-                    </React.Fragment>
-                  } />
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </List>
-        </Paper>
-      </React.Fragment>
+  return <React.Fragment>
+    {conversationsLoaded ? (
+      conversations.length ? (
+        <React.Fragment>
+          <Divider />
+          <Paper>
+            <List>
+              <ListItem>Recent Conversations</ListItem>
+              {conversations.map((conversation, conversationIndex) => (
+                <ListItem key={conversationIndex} disablePadding>
+                  <ListItemButton title={conversation.latest_message.from
+                    + " & " + conversation.latest_message.to
+                    + ": " + conversation.latest_message.subject}
+                    selected={conversationHash === conversation.conversation_id}
+                    onClick={() => handleConversationClick(conversation.url)}>
+                    <ListItemAvatar>
+                      <Avatar>{conversation.total}</Avatar>
+                    </ListItemAvatar>
+                    <ListItemText primary={StringHelper.addElipsis(conversation.latest_message.subject, 7)}
+                      secondary={
+                        <React.Fragment>
+                          <Typography variant="code">↓ {conversation.total_in} ↑ {conversation.total_out}</Typography>
+                          {' - '}
+                          <Moment format="fromNow">{conversation.latest_message.created_at}</Moment>
+                        </React.Fragment>
+                      } />
+                  </ListItemButton>
+                </ListItem>
+              ))}
+            </List>
+          </Paper>
+        </React.Fragment>
+      ) : (
+        'no conversations'
+      )
     ) : (
-      'no conversations'
-    )
-  ) : (
-    'loading...'
-  );
+      'loading...'
+    )}
+  </React.Fragment>;
 }

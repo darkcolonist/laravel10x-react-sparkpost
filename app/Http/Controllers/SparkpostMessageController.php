@@ -64,6 +64,6 @@ class SparkpostMessageController extends Controller
     }
 
     public function conversations(){
-      return Message::getConversationsWithLatestMessages();
+      return Message::getConversationsWithLatestMessages(request()->input('lastID'));
     }
 }

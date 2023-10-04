@@ -13,35 +13,26 @@ class MessagesController extends Controller
   {
     return response()->json(Message::respondToConversation(request()->all())
       , 200);
-
-    // $message = ConversationFacade::send([
-    //   "message" => request()->get('message'),
-    //   "meta" => [
-    //     "clientSideMessageID" => request()->get('clientSideMessageID')
-    //   ]
-    // ], session()->getId());
-
-    // return response()->json($message, 200);
   }
 
-  /**
-   * TODO not implemented
-   */
-  public function fetch()
-  {
-    $lastMessage = ConversationFacade::fetch(session()->getId(), request()->get('lastID'));
-    return response()->json($lastMessage, 200);
-  }
+  // /**
+  //  * TODO not implemented
+  //  */
+  // public function fetch()
+  // {
+  //   $lastMessage = ConversationFacade::fetch(session()->getId(), request()->get('lastID'));
+  //   return response()->json($lastMessage, 200);
+  // }
 
   public function history()
   {
-    // $messages = ConversationFacade::history(session()->getId());
-    $messages = Message::getMessagesByConversation(request()->input('conversation'));
+    $messages = Message::getMessagesByConversation(request()->input('conversation'), request()->input('lastID'));
 
     if(count($messages))
-      return response()->json($messages, 200);
+      return response()->json($messages);
 
-    return response()->json("empty resultset", 404);
+    // no change of data detected but terminated long polling
+    return response()->json(0);
   }
 
   /**

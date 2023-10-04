@@ -6,14 +6,11 @@ import CircleIcon from '@mui/icons-material/RadioButtonUnchecked';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorCircleIcon from '@mui/icons-material/ErrorOutline';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import { setFetchLatestLastMessageID, startFetchLatest, stopFetchLatest } from "../pollers/messagePollers";
 import ArrayHelper from "../helpers/ArrayHelper";
 import uniqid from "uniqid";
 import { MomentTooltip } from "./Moment";
 import { useParams } from "react-router-dom";
-import { useCurrentConversationStore } from "../helpers/StateHelper";
-
-const WELCOME_MESSAGE = `hello there, ${APP_VISITOR}. just type a message to see what happens.`;
+import { useCurrentConversationStore, useLongPollerStore } from "../helpers/StateHelper";
 
 const MessageCardContent = function(props){
   return (
@@ -96,6 +93,9 @@ export default function ChatWidgetCenterThread({shouldPlaySound}){
   const messageListRef = useRef(null);
   const audioRef = useRef(null);
 
+  const addPoller = useLongPollerStore((state) => state.addPoller);
+  const removePoller = useLongPollerStore((state) => state.removePoller);
+
   const { conversationHash } = useParams();
 
   const messageSamples = [
@@ -134,15 +134,15 @@ export default function ChatWidgetCenterThread({shouldPlaySound}){
   React.useEffect(() => {
     if(messageHistoryLoaded){
       // Start the long polling loop
-      startFetchLatest(newMessagesReceivedFromServer);
+      // startFetchLatest(newMessagesReceivedFromServer);
       setIsFormDisabled(false);
     }else{
-      stopFetchLatest();
+      // stopFetchLatest();
       setIsFormDisabled(true);
     }
 
     return () => {
-      stopFetchLatest();
+      // stopFetchLatest();
     };
   }, [messageHistoryLoaded]);
 
@@ -158,56 +158,95 @@ export default function ChatWidgetCenterThread({shouldPlaySound}){
 
     // Add event listener for window resize
     window.addEventListener('resize', handleResize);
-
-    // fetchMessageHistory();
-
-    // console.debug('current conversation', conversationHash);
-
-    // Clean up the event listener when component is unmounted
     return () => {
       window.removeEventListener('resize', handleResize);
-      stopFetchLatest();
+      // stopFetchLatest();
     };
   }, []);
 
   React.useEffect(() => {
     setMessages([]); // clear
-    fetchMessageHistory(conversationHash);
-  },[conversationHash]);
-
-  const fetchMessageHistory = async (conversationHash) => {
     setMessageHistoryLoaded(false);
-    const { data } = await axios.post('/message/history', {
-      conversation: conversationHash
+    appendToMessages({ type: "info", message: `viewing conversation ${conversationHash}`, time: PAGE_LOAD });
+    addPoller({
+      id: "messageHistory",
+      url: "/message/history",
+      post: {
+        conversation: conversationHash
+      },
+      onNewUpdates: (newMessages) => {
+        processDataIntoMessageHistory(newMessages);
+      }
     });
 
-    let lastInboundMessage = null;
+    return () => {
+      removePoller('messageHistory');
+    }
+  },[conversationHash]);
 
-    if (ArrayHelper.isNonEmptyArray(data)) {
-      appendToMessages({ type: "info", message: `viewing conversation ${conversationHash}`, time: PAGE_LOAD });
-      data.reverse();
-      data.forEach((newMessage) => {
+  const processDataIntoMessageHistory = (messages) => {
+    // console.debug(messages);
+
+    let lastInboundMessage;
+
+    if (ArrayHelper.isNonEmptyArray(messages)) {
+      messages.reverse();
+      messages.forEach((newMessage) => {
         const formattedMessage = formatMessage(newMessage);
         appendToMessages(formattedMessage);
 
-        if(newMessage.direction === 'in')
+        if (newMessage.direction === 'in')
           lastInboundMessage = newMessage;
       });
-
-      setFetchLatestLastMessageID(data[data.length - 1].id);
-
-      // console.debug(lastInboundMessage);
-      if(lastInboundMessage){
-        useCurrentConversationStore.setState({
-          to: lastInboundMessage.to
-          , from: lastInboundMessage.from
-          , subject: lastInboundMessage.subject
-          , conversationID: lastInboundMessage.conversation_id
-        });
-      }
     }
+
+    if (lastInboundMessage) {
+      useCurrentConversationStore.setState({
+        to: lastInboundMessage.to
+        , from: lastInboundMessage.from
+        , subject: lastInboundMessage.subject
+        , conversationID: lastInboundMessage.conversation_id
+      });
+    }
+
     setMessageHistoryLoaded(true);
   }
+
+  // const fetchMessageHistory = async (conversationHash) => {
+  //   setMessageHistoryLoaded(false);
+  //   const { data } = await axios.post('/message/history', {
+  //     conversation: conversationHash
+  //   });
+
+  //   let lastInboundMessage = null;
+
+  //   if (ArrayHelper.isNonEmptyArray(data)) {
+  //     appendToMessages({ type: "info", message: `viewing conversation ${conversationHash}`, time: PAGE_LOAD });
+  //     useCurrentConversationStore.setState({lastLoadedMessageID: data[0].id});
+  //     data.reverse();
+
+  //     data.forEach((newMessage) => {
+  //       const formattedMessage = formatMessage(newMessage);
+  //       appendToMessages(formattedMessage);
+
+  //       if(newMessage.direction === 'in')
+  //         lastInboundMessage = newMessage;
+  //     });
+
+  //     // setFetchLatestLastMessageID(data[data.length - 1].id);
+
+  //     // console.debug(lastInboundMessage);
+  //     if(lastInboundMessage){
+  //       useCurrentConversationStore.setState({
+  //         to: lastInboundMessage.to
+  //         , from: lastInboundMessage.from
+  //         , subject: lastInboundMessage.subject
+  //         , conversationID: lastInboundMessage.conversation_id
+  //       });
+  //     }
+  //   }
+  //   setMessageHistoryLoaded(true);
+  // }
 
   const setSendingMessageToSent = (setMessages, theMessage) => {
     // console.debug(theMessage);
@@ -255,18 +294,7 @@ export default function ChatWidgetCenterThread({shouldPlaySound}){
       // this is to prevent showing the message you already sent in
       // your present chatbox
       const isDuplicate = prevMessages.some((message) => {
-        if (
-          newMessageObject.meta &&
-          typeof newMessageObject.meta === 'object' &&
-          newMessageObject.meta.clientSideMessageID !== undefined &&
-          message.clientSideMessageID !== undefined
-        ) {
-          // console.debug(`${message.clientSideMessageID} === ${newMessageObject.meta.clientSideMessageID}`);
-          const duplicateResult = message.clientSideMessageID === newMessageObject.meta.clientSideMessageID;
-
-          return duplicateResult;
-        }
-        return false;
+        return message.id === newMessageObject.id;
       });
 
       if (isDuplicate) {
@@ -298,28 +326,6 @@ export default function ChatWidgetCenterThread({shouldPlaySound}){
       message.message = message.content;
 
     return message;
-  }
-
-  const newMessagesReceivedFromServer = (newMessages) => {
-    if(ArrayHelper.isNonEmptyArray(newMessages))
-    {
-      newMessages.forEach((message) => {
-        const formattedMessage = formatMessage(message);
-
-        appendToMessages(formattedMessage);
-      });
-
-      const lastMessageInList = newMessages[newMessages.length - 1];
-
-      setFetchLatestLastMessageID(lastMessageInList.id);
-
-      if (lastMessageInList.type === 'in'){
-        setIsFormDisabled(false);
-        // play our sound
-        playAlertSound();
-      }
-
-    }
   }
 
   // React.useEffect(() => {

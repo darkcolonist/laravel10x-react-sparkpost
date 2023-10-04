@@ -31,7 +31,8 @@ export default function(){
     axios.interceptors.response.use(
       response => {
         // console.log("found", response.data);
-        if (response.data.type !== undefined
+        if (response !== undefined
+          && response.data.type !== undefined
           && response.data.type === "token_mismatch") {
           fallbackAndReload("token mismatch detected, reloading page.");
           // console.log("token mismatch detected, reloading page."); //☺old implementations
